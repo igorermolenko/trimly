@@ -1,0 +1,52 @@
+{
+  "slug": "_scaffold",
+  "source": "docs/architecture-map.md (mode: greenfield-bootstrap), ADR-0001..0003",
+  "smoke_test": "./mvnw -B verify passes: the project builds, the Spring context boots against a Testcontainers PostgreSQL, Flyway applies all migrations, the module-boundary test and the (otherwise empty) test suite pass, and ./mvnw -B spotless:check passes",
+  "tasks": [
+    {
+      "id": "S1",
+      "title": "Create the Maven Spring Boot project, root package and entry point",
+      "layer": "scaffold",
+      "deps": [],
+      "acs": [],
+      "dod": "Maven Wrapper committed; pom.xml on Java 21 and Spring Boot 4.1.x (pin the current GA patch) with spring-boot-starter-web, spring-boot-starter-validation, spring-boot-starter-data-jdbc, postgresql driver, flyway-core + flyway-database-postgresql, spring-modulith-starter-core; TrimlyApplication in io.github.igorermolenko.trimly; empty module packages link/ and redirect/ (package-info.java each) and shared/ with a @RestControllerAdvice returning RFC 9457 ProblemDetail and a UUIDv7 ID generator; application.yml holds non-secret defaults only and reads SPRING_DATASOURCE_* from env; `./mvnw -B package -DskipTests` succeeds",
+      "files_hint": ["pom.xml", "mvnw", ".mvn/wrapper/", "src/main/java/io/github/igorermolenko/trimly/", "src/main/resources/application.yml"]
+    },
+    {
+      "id": "S2",
+      "title": "Wire the test harness, module-boundary test and formatting check",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "JUnit 5 + AssertJ; Surefire runs *Test, Failsafe runs *IT; Testcontainers PostgreSQL wired via @ServiceConnection in a shared test configuration; ModularityTest (ApplicationModules.verify()) passes; an ApplicationBootIT boots the full context against the container; a unit test for the UUIDv7 generator; Spotless with google-java-format configured; `./mvnw -B verify` and `./mvnw -B spotless:check` pass",
+      "files_hint": ["pom.xml", "src/test/java/io/github/igorermolenko/trimly/"]
+    },
+    {
+      "id": "S3",
+      "title": "Set up Flyway with an initial baseline migration",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "src/main/resources/db/migration/V1__baseline.sql exists (no feature tables; feature schemas come from data-model); Flyway applies it cleanly on a fresh Testcontainers PostgreSQL during ApplicationBootIT; re-running on an already-migrated database is a no-op (Flyway is forward-only, so there is no down migration)",
+      "files_hint": ["src/main/resources/db/migration/"]
+    },
+    {
+      "id": "S4",
+      "title": "Add the GitHub Actions CI workflow",
+      "layer": "scaffold",
+      "deps": ["S2", "S3"],
+      "acs": [],
+      "dod": ".github/workflows/ci.yml runs on push and pull_request: checkout, setup-java 21 (Corretto) with Maven cache, `./mvnw -B verify`, `./mvnw -B spotless:check`; the workflow is valid YAML and uses only the commands in the architecture map; no deploy step (Fly.io deployment is a later roadmap step)",
+      "files_hint": [".github/workflows/ci.yml"]
+    },
+    {
+      "id": "S5",
+      "title": "Write CLAUDE.md from the chosen conventions",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "CLAUDE.md states the build/test/lint commands, the module + layer rules, persistence/migration/ID/error/secret conventions and links docs/architecture-map.md and docs/adr/; nothing in it contradicts the architecture map",
+      "files_hint": ["CLAUDE.md"]
+    }
+  ]
+}

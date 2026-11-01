@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: "21"
+          cache: maven
+
+      # Unit tests (Surefire) + integration tests against a Testcontainers PostgreSQL (Failsafe)
+      - name: Build and test
+        run: ./mvnw -B verify
+
+      - name: Check formatting
+        run: ./mvnw -B spotless:check

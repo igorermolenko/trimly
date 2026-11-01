@@ -222,3 +222,11 @@ __marimo__/
 # SDD per-developer files
 .claude/*.local.md
 .worktrees/
+
+# Java / Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml

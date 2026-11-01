@@ -1,0 +1,16 @@
+# Non-secret defaults only. The database connection comes from env vars, which Spring Boot
+# binds to spring.datasource.* automatically:
+# SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, SPRING_DATASOURCE_PASSWORD.
+spring:
+  application:
+    name: trimly
+  flyway:
+    locations: classpath:db/migration
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  error:
+    include-stacktrace: never
+    include-message: never

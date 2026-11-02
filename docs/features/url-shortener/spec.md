@@ -40,7 +40,7 @@ Traceability:
 - **Anonymous link creation and abuse handling for strangers.** Excluded by the owner (brief §5). Only the owner holds the credential that creates links.
 - **Changing a link's target URL or deleting a link.** A short code must never start pointing somewhere new (CONTEXT invariants). The owner disables the link instead, and creates a new one if needed.
 - **Checking that a target site exists or is safe.** The owner is the only, trusted creator, and a reachability check would slow down creation.
-- **A web interface.** trimly is API-only at this stage (`docs/architecture-map.md` §Frontend). Visitors only ever receive redirects or a short "not found" / "unavailable" response.
+- **A web interface.** trimly is API-only at this stage (`docs/architecture-map.md` §Frontend). Visitors only ever receive redirects or a short "not found" / "unavailable" response. That visitor response is a human-readable sentence shown as plain text, a deliberate exception to the project's machine-readable error format, which still applies to every owner operation.
 
 ## 4. User stories
 
@@ -92,7 +92,7 @@ Traceability:
 
 **Given** the owner presents the owner credential
 **When** the owner submits an absolute web address using http or https, at most 2048 characters long, as the target URL
-**Then** the system records a new active short link with a freshly generated 7-character short code made of Latin letters and digits without look-alike characters (such as 0, O, o, 1, l, I), where letter case matters and the code cannot be predicted from earlier codes, and returns the full short link, its short code and its target URL to the owner
+**Then** the system records a new active short link with a freshly generated 7-character short code drawn from the short-code alphabet (A–Z, a–z and 2–9 with exactly these six look-alike characters removed: 0, O, o, 1, l, I; 56 characters in all), where letter case matters and each character is chosen by a cryptographically secure random source, so the code cannot be predicted from earlier codes. The target URL is stored and later redirected to exactly as submitted, with no normalisation. The owner gets back the full short link, its short code and its target URL. The full short link is always built from trimly's single configured public address, whatever address the request arrived on
 
 ### AC-02 (US-01) — domain invariant
 
@@ -109,26 +109,26 @@ Traceability:
 ### AC-04 (US-01) — error
 
 **Given** the owner presents the owner credential
-**When** the owner submits a target URL longer than 2048 characters
+**When** the owner submits a target URL longer than 2048 characters (counted on the submitted text as is)
 **Then** the system blocks the creation, tells the owner the maximum length is 2048 characters, and creates nothing
 
 ### AC-05 (US-01) — error
 
 **Given** the owner presents the owner credential
-**When** the owner submits a target URL that contains spaces, line breaks or other control characters
-**Then** the system blocks the creation, tells the owner the address must be properly encoded, and creates nothing
+**When** the owner submits a target URL that contains spaces (including leading or trailing ones), line breaks, other control characters, or any non-ASCII character (for example "é" in the path or a host written in non-Latin letters)
+**Then** the system blocks the creation, tells the owner the address must be properly encoded (non-Latin hosts in their ASCII "xn--" form, other characters percent-encoded), and creates nothing; trimly never trims or re-encodes the address itself
 
 ### AC-06 (US-01) — domain invariant
 
 **Given** the owner presents the owner credential
-**When** the owner submits a target URL whose host is any of trimly's own configured domains, compared without regard to letter case or a trailing dot (including one of trimly's own short links)
+**When** the owner submits a target URL whose host is any of trimly's own configured domains or a subdomain of one, compared in ASCII form without regard to letter case or a trailing dot (including one of trimly's own short links); the configured domains are exactly trimly's own hosts, never a shared parent domain of its hosting provider, and which domain trimly uses is roadmap decision D2
 **Then** the system blocks the creation and tells the owner that a short link cannot point back to trimly ("no redirect loops")
 
 ### AC-07 (US-02) — happy path
 
 **Given** an active short link exists
 **When** a visitor opens it
-**Then** the visitor is sent straight to its target URL, with no trimly page in between
+**Then** the visitor is sent straight to its target URL exactly as stored, with no trimly page in between. This also holds when the visitor's address ends with a single trailing slash or carries a query string; that query string is ignored and never passed on to the target URL. No browser or intermediary may reuse that redirect later without asking trimly again (so every visit reaches trimly and a later disable applies to it)
 
 ### AC-08 (US-02, US-01) — cross-context
 
@@ -140,7 +140,7 @@ Traceability:
 
 **Given** the owner has several short links, some active and some disabled
 **When** the owner lists their short links
-**Then** the owner sees each link's short code, target URL, creation time and state, newest first, one page at a time, with a way to get the next page
+**Then** the owner sees each link's short code, target URL, creation time and state, newest first (links created at the same moment: the later-created one first), one page at a time: 20 links per page by default, up to 100 if the owner asks. Each page offers a way to continue right after its last link, so links created while the owner is paging never make a link appear twice or get skipped
 
 ### AC-10 (US-03) — happy path (edge)
 
@@ -182,25 +182,31 @@ Traceability:
 
 **Given** a short code does not exist, or is not a well-formed short code
 **When** a visitor opens it
-**Then** the visitor sees "link not found", identical to what a disabled link shows, with no hint whether the code ever existed
+**Then** the visitor sees "link not found" as a short human-readable sentence that a browser displays as plain text, identical to what a disabled link shows, with no hint whether the code ever existed
 
 ### AC-16b (US-06) — error
 
-**Given** a visitor opens an address whose shape cannot be a short code (wrong length, or characters outside the short-code alphabet)
+**Given** a visitor opens an address whose shape cannot be a short code (wrong length, characters outside the short-code alphabet defined in AC-01, extra path segments, or trailing punctuation such as "abc2345.")
 **When** trimly handles it
-**Then** the visitor gets "link not found" without trimly looking anything up in its link storage, so the answer stays "link not found" even while the link storage is unavailable
+**Then** the visitor gets "link not found" without trimly looking anything up in its link storage, so the answer stays "link not found" even while the link storage is unavailable. A single trailing slash after a short code and any query string the visitor's address carries do not make it malformed: they are accepted as in AC-07
 
 ### AC-17 (US-06) — cross-context
 
-**Given** trimly temporarily cannot look up links because its link storage is not responding
+**Given** trimly temporarily cannot look up links because its link storage has not answered within 2 seconds
 **When** a visitor opens a well-formed short code
-**Then** the visitor sees "temporarily unavailable, try again later", not "link not found"
+**Then** the visitor sees "temporarily unavailable, try again later" as a short human-readable sentence, no later than 2 seconds after opening the link, not "link not found"; trimly does not serve the redirect from any remembered copy of the link. Link storage that is waking from idle and answers within the 2 seconds is not unavailable: the visitor gets the normal outcome (AC-07, AC-12 or AC-16)
+
+### AC-17b (US-01, US-03, US-04, US-05) — error
+
+**Given** the owner presents the owner credential and the link storage has not answered within 2 seconds
+**When** the owner creates, lists, disables or re-enables short links
+**Then** the owner is told "temporarily unavailable, try again later" and nothing is confirmed; if an unconfirmed creation was in fact recorded, retrying it creates a second, separate short link (AC-02), which is accepted: the owner sees both in the list and can disable the extra one
 
 ### AC-18 (US-07) — authorization
 
 **Given** a person presents no owner credential, or a wrong one
 **When** they try to create, list, disable or re-enable short links
-**Then** the system denies the action, says authentication is required, creates or changes nothing, and reveals no link data
+**Then** the system denies the action, says authentication is required, creates or changes nothing, and reveals no link data; a missing credential and a wrong one get an identical answer
 
 ### AC-19 (US-02, US-07) — authorization
 
@@ -218,7 +224,7 @@ Traceability:
 
 **Given** the generator produces a short code that is already taken
 **When** the owner creates a short link
-**Then** the owner still gets a new short link with a different, unused short code, not an error
+**Then** the owner still gets a new short link with a different, unused short code, not an error. trimly tries up to 5 freshly generated codes. If all 5 are taken (practically impossible with 56⁷ ≈ 1.7 × 10¹² codes), the owner is told "temporarily unavailable, try again later", as in AC-17b, and nothing is created
 
 ## 6. Non-functional requirements
 
@@ -228,17 +234,18 @@ Traceability:
 | Redirect latency p95, first request after the link storage has idled (≥ 5 min without requests) | ≤ 1 s server-side | same metric, filtered to the first request after an idle gap |
 | Owner operations latency p95 (create, list, disable, re-enable) | ≤ 300 ms with link storage awake; ≤ 1.5 s for the first request after idle | server-side request-duration metric per operation |
 | Throughput | ≥ 50 redirects/s sustained on one production-size instance, link storage awake | load test run before the deploy step (roadmap step 3) |
-| Availability of redirects | 99.5 % per calendar month (≈ 3.6 h downtime allowed) | external uptime probe every 5 min against a known active short link |
-| Disable propagation | 0 s: the first visit after a disable is confirmed already gets "link not found" | integration test for AC-12 |
+| Availability of redirects | 99.5 % per calendar month (≈ 3.6 h downtime allowed) | external uptime probe every 5 min against a known active short link; a probe fails unless it is redirected to the expected target URL within 5 s ("temporarily unavailable", "link not found" or no answer all count as down) |
+| Disable propagation | 0 s: the first visit after a disable is confirmed already gets "link not found", including for visitors whose browser opened the link before | integration test for AC-12 (asserts the redirect is marked as not reusable without asking trimly) |
+| Storage-unavailable answer time | ≤ 2 s from request to "temporarily unavailable" (visitor and owner) | integration test for AC-17 / AC-17b with link storage stopped |
 | Running cost | ≤ $5 per month for everything needed to serve trimly | monthly hosting and database bills |
 
 ## 6.1 Security / privacy
 
 - **Data classification:** internal. A target URL is not a secret, but the owner's list of links and its states is not public, so only the owner can see it.
 - **Personal data touched:** none. A short link stores only its short code, target URL, creation time and state. This feature stores nothing about visitors, and click analytics are out of scope (§3).
-- **AuthZ/AuthN impact:** this adds one capability: the owner credential check. It guards creating, listing, disabling and re-enabling links. Following a short link needs no credential (AC-19). The owner credential is random and at least 32 characters long. trimly refuses to start without a credential that meets this rule. The credential is never written to logs or shown in any response. To rotate it, the operator sets a new value and restarts trimly; the old value stops working immediately. Failed credential attempts are not rate-limited, because guessing a 32-character random credential is not practical.
+- **AuthZ/AuthN impact:** this adds one capability: the owner credential check. It guards creating, listing, disabling and re-enabling links. Following a short link needs no credential (AC-19). The owner generates the owner credential randomly (for example with a password manager). trimly cannot verify randomness, so at startup it checks a concrete rule instead: at least 32 characters, printable ASCII only with no spaces, and at least 16 distinct characters. trimly refuses to start if the credential is missing or breaks this rule. The credential is never written to logs or shown in any response. A missing credential and a wrong one get an identical answer (AC-18). To rotate it, the owner sets a new value and restarts trimly; the old value stops working immediately. Failed credential attempts are not rate-limited, because guessing a 32-character random credential is not practical.
 - **Abuse cases:**
-  - Leaked owner credential, used to publish phishing links on trimly's domain. Response: the operator rotates the credential. The owner then lists the links (AC-09) and disables the foreign ones (AC-11, AC-12). A disable takes effect for every visitor at once, and an issued short code can never be pointed at a different target (AC-20).
+  - Leaked owner credential, used to publish phishing links on trimly's domain. Response: the owner rotates the credential, then lists the links (AC-09) and disables the foreign ones (AC-11, AC-12). A disable takes effect for every visitor at once, and an issued short code can never be pointed at a different target (AC-20).
   - Injection through the target URL (`javascript:` or `data:` addresses, control characters, redirect loops). Response: creation is blocked with a plain explanation (AC-03, AC-05, AC-06).
   - Guessing short codes to discover links. Response: codes are random and not sequential. An unknown code and a disabled link look identical (AC-16), and the list of links requires the owner credential (AC-18).
   - Flood of scanner or bot requests on the redirect side, which keeps link storage awake and uses up its free compute budget. Response: addresses that cannot be short codes are answered without touching link storage (AC-16b). Whether to also rate-limit visitors is an open question (§8).
@@ -249,7 +256,7 @@ Traceability:
 
 - **End-to-end success from a fresh browser** (brief §7 success criterion): a short link created on the deployed service sends a fresh browser, with no cache or cookies, to its target URL. Baseline: not possible today. Target: shown within 7 days of the first deploy (roadmap step 3); evidence recorded at `ship`.
 - **Acceptance criteria under automated test:** the share of §5 ACs covered by at least one passing automated test in CI. Baseline: 0 %. Target: 100 % when this feature merges, traced in the AC → test table produced by `plan-tests`.
-- **Owner dogfooding:** short links the owner actually creates and shares, counted from the owner's link list (AC-09). Baseline: 0. Target: at least 10 within the first 30 days after deploy.
+- **Owner dogfooding:** short links the owner actually creates and shares, counted from the owner's link list (AC-09), excluding the uptime-probe link and any link the owner made only to test trimly (the owner leaves these out by hand when counting). Baseline: 0. Target: at least 10 within the first 30 days after deploy.
 - **Time to neutralise a bad link:** time from the owner noticing a mistaken or malicious link until visitors get "link not found". Baseline: impossible without direct database access. Target: under 1 minute (one disable action), checked once by hand at `ship` from a fresh browser.
 
 ## 8. Open questions

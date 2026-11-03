@@ -281,6 +281,147 @@ sequenceDiagram
     end
 ```
 
+### List short links
+
+US-03, US-07. AC-09, AC-10, AC-17b, AC-18. The client is the owner. The service is the access and link modules (§5).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as client (owner)
+    participant S as service
+    participant D as data-store
+
+    Note over C,S: Precondition: none. The owner may have zero, some active or some disabled links
+    C->>S: asks for a page of short links (optional page size, optional continuation token)
+    alt owner credential missing or wrong
+        S-->>C: "authentication required" (identical for both), no link data revealed
+    else owner credential valid
+        S->>D: read the next page of links, newest first, after the token if given (2 s budget)
+        Note over S,D: reads short links ordered by id descending from the continuation point (informs data-model indexes)
+        alt storage answers with one or more links
+            D-->>S: up to page-size links plus whether more follow
+            S-->>C: each link's short code, target URL, creation time and state, plus a continuation token when more follow
+        else storage answers with no links
+            D-->>S: no links
+            S-->>C: an empty list, not an error
+        else storage does not answer within 2 s
+            D--xS: timeout or connection failure
+            S-->>C: "temporarily unavailable, try again later", nothing confirmed
+        end
+    end
+    Note over C,S: Postcondition: nothing changed. Links created while paging never appear twice or get skipped
+```
+
+### Disable or re-enable a short link
+
+US-04, US-05, US-07. AC-11, AC-13, AC-14, AC-15, AC-17b, AC-18. The client is the owner. The service is the access and link modules (§5). Disable and re-enable are the same flow with the target state flipped.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as client (owner)
+    participant S as service
+    participant D as data-store
+
+    Note over C,S: Precondition: a short code is named. Its link may be active, disabled or nonexistent
+    C->>S: asks to disable (or re-enable) the link with this short code
+    alt owner credential missing or wrong
+        S-->>C: "authentication required" (identical for both), nothing changed
+    else owner credential valid
+        S->>D: set the state of the link with this short code to the target state, in one statement (2 s budget)
+        Note over S,D: persists the link's state by short code (informs data-model indexes)
+        alt storage answers and a link matched
+            D-->>S: the link, now in the target state
+            S-->>C: confirms the link's current state (also when it was already in that state)
+        else storage answers and no link has this short code
+            D-->>S: no link matched
+            S-->>C: "link not found", nothing changed
+        else storage does not answer within 2 s
+            D--xS: timeout or connection failure
+            S-->>C: "temporarily unavailable, try again later", nothing confirmed
+        end
+    end
+    Note over C,S: Postcondition: the link is in the target state and the next visit sees it. The target URL and short code never change
+```
+
+### Cross-cutting: link lifecycle
+
+US-01, US-02, US-04, US-05. AC-02, AC-08, AC-12, AC-15, AC-20. This flow shows how the owner and visitor paths meet on one link over time. Authentication and storage-unavailable branches are drawn in the flows above and are left out here.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor O as client (owner)
+    actor V as client (visitor)
+    participant S as service
+    participant D as data-store
+
+    Note over O,D: Precondition: the owner holds the owner credential and storage is answering
+    O->>S: creates a short link for target URL X
+    S->>D: insert the link with a fresh short code A, active
+    Note over S,D: persists short link (id, short code A unique, target URL X, creation time, state)
+    D-->>S: stored
+    S-->>O: short link A for X
+    V->>S: opens short link A immediately afterwards
+    S->>D: read the link by short code A
+    D-->>S: active link to X
+    S-->>V: redirect to X, marked not reusable
+    O->>S: creates a short link for target URL X again
+    S->>D: insert the link with a fresh short code B, active
+    Note over S,D: persists a second short link. Short code A is taken and never reissued
+    D-->>S: stored
+    S-->>O: short link B for X, a different code, A unchanged
+    O->>S: disables short link A
+    S->>D: set the state of A to disabled
+    Note over S,D: persists the state of A
+    D-->>S: A is disabled
+    S-->>O: confirms A is disabled
+    V->>S: opens short link A again (browser opened it before the disable)
+    S->>D: read the link by short code A
+    D-->>S: A is disabled
+    S-->>V: plain text "link not found", not redirected
+    O->>S: re-enables short link A
+    S->>D: set the state of A to active
+    Note over S,D: persists the state of A
+    D-->>S: A is active
+    S-->>O: confirms A is active
+    V->>S: opens short link A
+    S->>D: read the link by short code A
+    D-->>S: active link to X
+    S-->>V: redirect to the same target URL X
+    Note over O,D: Postcondition: A and B both exist and both lead to X. No short code ever pointed at a different target URL
+```
+
+### Coverage: user stories and acceptance criteria
+
+| Spec item | Shown in |
+|---|---|
+| US-01 Create | Critical flow 2; Cross-cutting: link lifecycle |
+| US-02 Follow | Critical flow 1; Cross-cutting: link lifecycle |
+| US-03 List | List short links |
+| US-04 Disable | Disable or re-enable a short link; Cross-cutting: link lifecycle |
+| US-05 Re-enable | Disable or re-enable a short link; Cross-cutting: link lifecycle |
+| US-06 Understand a failed link | Critical flow 1 ("link not found" and "temporarily unavailable" branches) |
+| US-07 Owner-only management | Auth-denied branch in critical flow 2, List and Disable or re-enable |
+| AC-01, AC-03…AC-06, AC-20b | Critical flow 2 (happy path, rule-break branch, code-retry loop) |
+| AC-02, AC-08, AC-20 | Cross-cutting: link lifecycle |
+| AC-07, AC-16, AC-16b, AC-17, AC-19 | Critical flow 1 |
+| AC-09, AC-10 | List short links (page branch, empty-list branch) |
+| AC-11, AC-13, AC-14 | Disable or re-enable (matched branch, no-link branch, repeat confirms current state) |
+| AC-12 | Critical flow 1 (disabled branch); Cross-cutting: link lifecycle |
+| AC-15 | Disable or re-enable; Cross-cutting: link lifecycle |
+| AC-17b | Unavailable branch in critical flow 2, List and Disable or re-enable |
+| AC-18 | Auth-denied branch in critical flow 2, List and Disable or re-enable |
+
+No AC is non-runtime. Every flow is synchronous, so no idempotency key, retry or dead-letter step applies.
+
+**Flagged for later stages (not decided here):**
+- **`api`:** the List flow does not draw a page size above 100 or a garbled continuation token, because no AC covers them. The `api` stage fixes those error answers.
+- **`api`:** the Disable or re-enable flow does not decide whether a malformed short code on the owner path gets "link not found" without a storage call, as AC-16b does for visitors. AC-13 only requires "not found".
+- **`data-model`:** persist and read notes imply a unique index on the short code (create, follow, disable and re-enable all look up by it) and primary-key-descending reads for the list (ADR-0004). Critical flow 2 has no persist note of its own; the lifecycle flow carries it.
+- The seed flows (1, 2) name §5 modules as participants, while the later flows use the generic client / service / data-store vocabulary. They were left as written because this stage only adds flows.
+
 ## 7. Deployment view
 
 <!-- 🎯 Why: the TOPOLOGY DevOps must know without reading the deploy charts — how many replicas,

@@ -167,7 +167,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/app/PageCursorTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/list-short-links-use-case.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T9",

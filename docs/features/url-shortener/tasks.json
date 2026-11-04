@@ -255,7 +255,7 @@
         "docs/architecture-map.md"
       ],
       "file": "docs/features/url-shortener/tasks/owner-api-security-filter-chain.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T13",

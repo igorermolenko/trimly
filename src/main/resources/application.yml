@@ -4,6 +4,24 @@
 spring:
   application:
     name: trimly
+  # Every link-storage call answers within 2 s (ADR-0003). The budget is the sum of these bounds:
+  #   acquire a connection (incl. validating a pooled one, or connecting/waking Neon) <= 950 ms
+  #   + the statement on it: server statement_timeout 900 ms, and a client socketTimeout of 1 s
+  #     that also bounds a server that does not answer at all (the driver only takes whole seconds)
+  #   = at most ~1.95 s before a DataAccessException that link.app reports as "unavailable".
+  # The pool drains when idle (minimum-idle 0, idle-timeout at Hikari's 10 s floor), so Neon can
+  # scale to zero; the first request after idle opens a fresh connection inside the same budget.
+  datasource:
+    hikari:
+      minimum-idle: 0
+      idle-timeout: 10000
+      connection-timeout: 950
+      validation-timeout: 250
+      connection-init-sql: SET statement_timeout = 900
+      data-source-properties:
+        connectTimeout: 1
+        loginTimeout: 1
+        socketTimeout: 1
   flyway:
     locations: classpath:db/migration
   mvc:
@@ -14,3 +32,20 @@ server:
   error:
     include-stacktrace: never
     include-message: never
+
+# Health and metrics live on a separate management port that is never routed publicly (sad §7).
+# Health checks must not touch link storage, so the pool can drain and Neon can scale to zero.
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  health:
+    db:
+      enabled: false
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true

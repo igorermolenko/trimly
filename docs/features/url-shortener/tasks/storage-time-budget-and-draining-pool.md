@@ -9,8 +9,8 @@ files_hint: ["src/main/resources/application.yml", "pom.xml", "src/test/java/io/
 owner: "igorermolenko"
 estimate: "M"
 context_budget: "M"     # 43 inlined lines
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- To the executing agent: work from what is inlined here. If a slice is insufficient, ambiguous,

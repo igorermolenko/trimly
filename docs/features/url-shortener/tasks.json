@@ -117,7 +117,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/infra/StorageTimeBudgetIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/storage-time-budget-and-draining-pool.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T7",

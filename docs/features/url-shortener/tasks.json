@@ -51,7 +51,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/domain/ShortCodeGeneratorTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/short-code-and-generator.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T4",

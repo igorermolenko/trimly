@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/link/domain/ShortCode
 owner: "igorermolenko"
 estimate: "S"
 context_budget: "S"     # 38 inlined lines
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- To the executing agent: work from what is inlined here. If a slice is insufficient, ambiguous,

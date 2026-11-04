@@ -214,7 +214,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/app/LinkLookupIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/link-lookup-sealed-resolution.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T11",

@@ -32,7 +32,7 @@
         "src/test/java/io/github/igorermolenko/trimly/shared/IdGeneratorTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/monotonic-id-generator.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T3",

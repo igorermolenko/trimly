@@ -28,12 +28,14 @@ enum LinkProblems {
       "link.target_url_points_to_trimly",
       "A short link cannot point back to trimly."),
   INVALID_PAGE_SIZE(
-      HttpStatus.BAD_REQUEST, "link.invalid_page_size", "The page size must be between 1 and 100."),
+      HttpStatus.BAD_REQUEST,
+      "link.invalid_page_size",
+      "The page size must be a whole number from 1 to 100."),
   INVALID_CURSOR(
       HttpStatus.BAD_REQUEST,
       "link.invalid_cursor",
-      "The continuation token is not one this API issued."),
-  NOT_FOUND(HttpStatus.NOT_FOUND, "link.not_found", "Link not found."),
+      "The continuation token is not valid. Start again from the first page."),
+  NOT_FOUND(HttpStatus.NOT_FOUND, "link.not_found", "The link was not found."),
   TEMPORARILY_UNAVAILABLE(
       HttpStatus.SERVICE_UNAVAILABLE,
       "link.temporarily_unavailable",

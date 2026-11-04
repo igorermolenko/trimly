@@ -311,7 +311,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/api/ChangeLinkStateIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/list-disable-enable-endpoints.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T15",

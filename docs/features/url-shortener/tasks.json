@@ -145,7 +145,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/app/CreateShortLinkIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/create-short-link-use-case.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T8",

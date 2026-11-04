@@ -28,6 +28,12 @@ spring:
     problemdetails:
       enabled: true
 
+# Local defaults; production sets TRIMLY_PUBLIC_BASE_URL and TRIMLY_OWN_HOSTS (domain: roadmap D2).
+trimly:
+  public-base-url: http://localhost:8080
+  own-hosts:
+    - localhost
+
 server:
   error:
     include-stacktrace: never

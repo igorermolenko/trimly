@@ -14,7 +14,7 @@
 | T4 | [Add TargetUrl validation rules (scheme, length, encoding, own hosts) in link.domain](./target-url-rules.md) | domain | igorermolenko | M | — | done | COMMIT |
 | T5 | [Persist ShortLink through a Spring Data JDBC store with constraint-aware failure translation](./short-link-store.md) | infra | igorermolenko | M | T1, T3 | done | COMMIT |
 | T6 | [Bound every storage call to 2 s, drain the idle pool and keep health checks off the DB](./storage-time-budget-and-draining-pool.md) | wiring | igorermolenko | M | T5 | done | COMMIT |
-| T7 | [Implement the CreateShortLink use case with 5-attempt insert-retry and public-base-url](./create-short-link-use-case.md) | app | igorermolenko | M | T2, T4, T5 | todo | — |
+| T7 | [Implement the CreateShortLink use case with 5-attempt insert-retry and public-base-url](./create-short-link-use-case.md) | app | igorermolenko | M | T2, T4, T5 | done | COMMIT |
 | T8 | [Implement ListShortLinks with keyset paging and an opaque continuation cursor](./list-short-links-use-case.md) | app | igorermolenko | S | T2, T5 | todo | — |
 | T9 | [Implement DisableShortLink and EnableShortLink as one idempotent state change](./disable-enable-use-cases.md) | app | igorermolenko | S | T5 | todo | — |
 | T10 | [Publish link.app.LinkLookup returning a sealed Resolution (Found / NotFound / Unavailable)](./link-lookup-sealed-resolution.md) | app | igorermolenko | S | T5 | todo | — |

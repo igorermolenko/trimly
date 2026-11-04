@@ -97,7 +97,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/infra/"
       ],
       "file": "docs/features/url-shortener/tasks/short-link-store.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T6",

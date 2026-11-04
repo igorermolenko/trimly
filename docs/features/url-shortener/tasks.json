@@ -191,7 +191,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/app/ChangeLinkStateIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/disable-enable-use-cases.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T10",

@@ -9,8 +9,8 @@ files_hint: ["src/test/java/io/github/igorermolenko/trimly/LinkLifecycleIT.java"
 owner: "igorermolenko"
 estimate: "M"
 context_budget: "M"     # 74 inlined lines
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- To the executing agent: work from what is inlined here. If a slice is insufficient, ambiguous,

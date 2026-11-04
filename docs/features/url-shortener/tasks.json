@@ -363,7 +363,7 @@
         "src/test/java/io/github/igorermolenko/trimly/OwnerAuthDenialIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/cross-cutting-integration-tests.md",
-      "status": "todo"
+      "status": "done"
     }
   ]
 }

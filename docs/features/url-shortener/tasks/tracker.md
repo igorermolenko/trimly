@@ -18,7 +18,7 @@
 | T8 | [Implement ListShortLinks with keyset paging and an opaque continuation cursor](./list-short-links-use-case.md) | app | igorermolenko | S | T2, T5 | todo | — |
 | T9 | [Implement DisableShortLink and EnableShortLink as one idempotent state change](./disable-enable-use-cases.md) | app | igorermolenko | S | T5 | todo | — |
 | T10 | [Publish link.app.LinkLookup returning a sealed Resolution (Found / NotFound / Unavailable)](./link-lookup-sealed-resolution.md) | app | igorermolenko | S | T5 | todo | — |
-| T11 | [Add the access module's OwnerCredentialPolicy and fail-fast OwnerCredentialProperties](./owner-credential-policy.md) | domain | igorermolenko | S | — | todo | — |
+| T11 | [Add the access module's OwnerCredentialPolicy and fail-fast OwnerCredentialProperties](./owner-credential-policy.md) | domain | igorermolenko | S | — | done | COMMIT |
 | T12 | [Guard the owner API with a stateless bearer SecurityFilterChain and a Problem Details entry point](./owner-api-security-filter-chain.md) | ports | igorermolenko | M | T11 | todo | — |
 | T13 | [Expose POST /api/v1/links and the Problem Details `code` mapping for owner errors](./create-short-link-endpoint.md) | ports | igorermolenko | M | T7, T12 | todo | — |
 | T14 | [Expose GET /api/v1/links and POST …/{shortCode}/disable|enable](./list-disable-enable-endpoints.md) | ports | igorermolenko | M | T8, T9, T13 | todo | — |

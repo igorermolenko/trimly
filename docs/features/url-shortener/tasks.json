@@ -233,7 +233,7 @@
         "src/test/java/io/github/igorermolenko/trimly/access/app/OwnerCredentialPropertiesTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/owner-credential-policy.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T12",

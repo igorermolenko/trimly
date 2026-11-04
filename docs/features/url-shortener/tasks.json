@@ -71,7 +71,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/domain/TargetUrlTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/target-url-rules.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T5",

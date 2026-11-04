@@ -11,7 +11,7 @@
 | T1 | [Promote the staged short_link migration to V2__create_short_link.sql](./promote-short-link-migration.md) | migration | igorermolenko | S | — | done | COMMIT |
 | T2 | [Make shared.IdGenerator monotonic within a millisecond (RFC 9562 method 1)](./monotonic-id-generator.md) | domain | igorermolenko | S | — | done | COMMIT |
 | T3 | [Add ShortCode (alphabet, length, well-formedness) and the SecureRandom ShortCodeGenerator](./short-code-and-generator.md) | domain | igorermolenko | S | — | done | COMMIT |
-| T4 | [Add TargetUrl validation rules (scheme, length, encoding, own hosts) in link.domain](./target-url-rules.md) | domain | igorermolenko | M | — | todo | — |
+| T4 | [Add TargetUrl validation rules (scheme, length, encoding, own hosts) in link.domain](./target-url-rules.md) | domain | igorermolenko | M | — | done | COMMIT |
 | T5 | [Persist ShortLink through a Spring Data JDBC store with constraint-aware failure translation](./short-link-store.md) | infra | igorermolenko | M | T1, T3 | todo | — |
 | T6 | [Bound every storage call to 2 s, drain the idle pool and keep health checks off the DB](./storage-time-budget-and-draining-pool.md) | wiring | igorermolenko | M | T5 | todo | — |
 | T7 | [Implement the CreateShortLink use case with 5-attempt insert-retry and public-base-url](./create-short-link-use-case.md) | app | igorermolenko | M | T2, T4, T5 | todo | — |

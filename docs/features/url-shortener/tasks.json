@@ -1,0 +1,369 @@
+{
+  "slug": "url-shortener",
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Promote the staged short_link migration to V2__create_short_link.sql",
+      "layer": "migration",
+      "deps": [],
+      "acs": [
+        "AC-20"
+      ],
+      "dod": "`V2__create_short_link.sql` applies on a fresh Testcontainers Postgres at startup (`ApplicationBootIT` still green).",
+      "files_hint": [
+        "docs/features/url-shortener/migrations/01_create_short_link.up.sql",
+        "docs/features/url-shortener/migrations/01_create_short_link.down.sql",
+        "src/main/resources/db/migration/"
+      ],
+      "file": "docs/features/url-shortener/tasks/promote-short-link-migration.md",
+      "status": "todo"
+    },
+    {
+      "id": "T2",
+      "title": "Make shared.IdGenerator monotonic within a millisecond (RFC 9562 method 1)",
+      "layer": "domain",
+      "deps": [],
+      "acs": [
+        "AC-09"
+      ],
+      "dod": "`IdGeneratorTest` covers same-ms ordering, overflow and backwards clock, and passes.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/shared/IdGenerator.java",
+        "src/test/java/io/github/igorermolenko/trimly/shared/IdGeneratorTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/monotonic-id-generator.md",
+      "status": "todo"
+    },
+    {
+      "id": "T3",
+      "title": "Add ShortCode (alphabet, length, well-formedness) and the SecureRandom ShortCodeGenerator",
+      "layer": "domain",
+      "deps": [],
+      "acs": [
+        "AC-01",
+        "AC-16b"
+      ],
+      "dod": "`ShortCodeTest` passes: alphabet = 56 chars, every look-alike excluded, well-formedness table from Edge cases.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/ShortCode.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/ShortCodeGenerator.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/domain/ShortCodeTest.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/domain/ShortCodeGeneratorTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/short-code-and-generator.md",
+      "status": "todo"
+    },
+    {
+      "id": "T4",
+      "title": "Add TargetUrl validation rules (scheme, length, encoding, own hosts) in link.domain",
+      "layer": "domain",
+      "deps": [],
+      "acs": [
+        "AC-03",
+        "AC-04",
+        "AC-05",
+        "AC-06"
+      ],
+      "dod": "`TargetUrlTest` covers every Edge-case row and passes.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/TargetUrl.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/TargetUrlRejected.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/domain/TargetUrlTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/target-url-rules.md",
+      "status": "todo"
+    },
+    {
+      "id": "T5",
+      "title": "Persist ShortLink through a Spring Data JDBC store with constraint-aware failure translation",
+      "layer": "infra",
+      "deps": [
+        "T1",
+        "T3"
+      ],
+      "acs": [
+        "AC-20b",
+        "AC-17b"
+      ],
+      "dod": "`ShortLinkStoreIT` passes for insert, find-by-code, keyset page (incl. `size + 1` look-ahead) and state update (changed / unchanged / unknown).",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/ShortLink.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/LinkState.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/LinkStorageUnavailable.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/ShortCodeTaken.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/infra/",
+        "src/main/java/io/github/igorermolenko/trimly/link/app/StorageFailures.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/ShortLinkFixtures.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/infra/"
+      ],
+      "file": "docs/features/url-shortener/tasks/short-link-store.md",
+      "status": "todo"
+    },
+    {
+      "id": "T6",
+      "title": "Bound every storage call to 2 s, drain the idle pool and keep health checks off the DB",
+      "layer": "wiring",
+      "deps": [
+        "T5"
+      ],
+      "acs": [
+        "AC-17",
+        "AC-17b"
+      ],
+      "dod": "`StorageTimeBudgetIT` passes: every store operation answers `LinkStorageUnavailable` ≤ 2 s with the container paused, and succeeds after unpause.",
+      "files_hint": [
+        "src/main/resources/application.yml",
+        "pom.xml",
+        "src/test/java/io/github/igorermolenko/trimly/link/infra/StorageTimeBudgetIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/storage-time-budget-and-draining-pool.md",
+      "status": "todo"
+    },
+    {
+      "id": "T7",
+      "title": "Implement the CreateShortLink use case with 5-attempt insert-retry and public-base-url",
+      "layer": "app",
+      "deps": [
+        "T2",
+        "T4",
+        "T5"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-20",
+        "AC-20b",
+        "AC-17b"
+      ],
+      "dod": "`CreateShortLinkTest` passes for AC-02 and every AC-20b branch with a stub generator.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/app/CreateShortLink.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/app/LinkProperties.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/app/LinkConfiguration.java",
+        "src/main/resources/application.yml",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/CreateShortLinkTest.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/CreateShortLinkIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/create-short-link-use-case.md",
+      "status": "todo"
+    },
+    {
+      "id": "T8",
+      "title": "Implement ListShortLinks with keyset paging and an opaque continuation cursor",
+      "layer": "app",
+      "deps": [
+        "T2",
+        "T5"
+      ],
+      "acs": [
+        "AC-09",
+        "AC-10"
+      ],
+      "dod": "`ListShortLinksIT` passes: newest-first incl. same-ms ties, default 20 / max 100, concurrent-insert paging without duplicates or gaps, empty list.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/app/ListShortLinks.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/app/PageCursor.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/ListShortLinksIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/PageCursorTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/list-short-links-use-case.md",
+      "status": "todo"
+    },
+    {
+      "id": "T9",
+      "title": "Implement DisableShortLink and EnableShortLink as one idempotent state change",
+      "layer": "app",
+      "deps": [
+        "T5"
+      ],
+      "acs": [
+        "AC-11",
+        "AC-13",
+        "AC-14",
+        "AC-15"
+      ],
+      "dod": "`ChangeLinkStateIT` passes for every Edge-case row (store spy asserts no call for a malformed code).",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/app/ChangeLinkState.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/app/DisableShortLink.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/app/EnableShortLink.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/LinkNotFound.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/ChangeLinkStateIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/disable-enable-use-cases.md",
+      "status": "todo"
+    },
+    {
+      "id": "T10",
+      "title": "Publish link.app.LinkLookup returning a sealed Resolution (Found / NotFound / Unavailable)",
+      "layer": "app",
+      "deps": [
+        "T5"
+      ],
+      "acs": [
+        "AC-12",
+        "AC-16",
+        "AC-16b",
+        "AC-17"
+      ],
+      "dod": "`LinkLookupTest` passes: three outcomes + no store call on malformed input.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/app/LinkLookup.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/app/Resolution.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/LinkLookupTest.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/LinkLookupIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/link-lookup-sealed-resolution.md",
+      "status": "todo"
+    },
+    {
+      "id": "T11",
+      "title": "Add the access module's OwnerCredentialPolicy and fail-fast OwnerCredentialProperties",
+      "layer": "domain",
+      "deps": [],
+      "acs": [
+        "AC-18"
+      ],
+      "dod": "`OwnerCredentialPolicyTest` covers every Edge-case row.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/access/package-info.java",
+        "src/main/java/io/github/igorermolenko/trimly/access/domain/OwnerCredentialPolicy.java",
+        "src/main/java/io/github/igorermolenko/trimly/access/app/OwnerCredentialProperties.java",
+        "src/test/java/io/github/igorermolenko/trimly/access/domain/OwnerCredentialPolicyTest.java",
+        "src/test/java/io/github/igorermolenko/trimly/access/app/OwnerCredentialPropertiesTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/owner-credential-policy.md",
+      "status": "todo"
+    },
+    {
+      "id": "T12",
+      "title": "Guard the owner API with a stateless bearer SecurityFilterChain and a Problem Details entry point",
+      "layer": "ports",
+      "deps": [
+        "T11"
+      ],
+      "acs": [
+        "AC-18",
+        "AC-19"
+      ],
+      "dod": "`OwnerApiSecurityIT` passes: missing vs wrong credential byte-identical 401 with `code: access.authentication_required`; visitor path needs no credential.",
+      "files_hint": [
+        "pom.xml",
+        "src/main/java/io/github/igorermolenko/trimly/access/api/",
+        "src/test/java/io/github/igorermolenko/trimly/access/api/",
+        "CLAUDE.md",
+        "docs/architecture-map.md"
+      ],
+      "file": "docs/features/url-shortener/tasks/owner-api-security-filter-chain.md",
+      "status": "todo"
+    },
+    {
+      "id": "T13",
+      "title": "Expose POST /api/v1/links and the Problem Details `code` mapping for owner errors",
+      "layer": "ports",
+      "deps": [
+        "T7",
+        "T12"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-03",
+        "AC-04",
+        "AC-05",
+        "AC-06",
+        "AC-17b"
+      ],
+      "dod": "`CreateShortLinkIT` passes for AC-01 (201 shape, `shortUrl` host independence), AC-03…AC-06 (one 400 code each, nothing stored) and AC-17b (503).",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/api/CreateShortLinkController.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/api/ShortLinkResponse.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/api/LinkProblems.java",
+        "src/main/java/io/github/igorermolenko/trimly/shared/ProblemDetailsAdvice.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/api/CreateShortLinkIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/create-short-link-endpoint.md",
+      "status": "todo"
+    },
+    {
+      "id": "T14",
+      "title": "Expose GET /api/v1/links and POST …/{shortCode}/disable|enable",
+      "layer": "ports",
+      "deps": [
+        "T8",
+        "T9",
+        "T13"
+      ],
+      "acs": [
+        "AC-09",
+        "AC-10",
+        "AC-11",
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-17b"
+      ],
+      "dod": "`ListShortLinksIT` passes AC-09 (order, default/max size, continuation), AC-10 and the two 400 codes.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/api/ListShortLinksController.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/api/ChangeLinkStateController.java",
+        "src/main/java/io/github/igorermolenko/trimly/link/api/LinkProblems.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/api/ListShortLinksIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/api/ChangeLinkStateIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/list-disable-enable-endpoints.md",
+      "status": "todo"
+    },
+    {
+      "id": "T15",
+      "title": "Serve GET /{shortCode}: non-reusable 302, plain-text 404/503, query ignored",
+      "layer": "ports",
+      "deps": [
+        "T10",
+        "T12"
+      ],
+      "acs": [
+        "AC-07",
+        "AC-12",
+        "AC-16",
+        "AC-16b",
+        "AC-17",
+        "AC-19"
+      ],
+      "dod": "`RedirectIT` passes AC-07 (302, `Location`, `no-store`, slash/query), AC-12, AC-16, AC-16b (no lookup — spy), AC-19 (no credential).",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/redirect/",
+        "src/test/java/io/github/igorermolenko/trimly/redirect/"
+      ],
+      "file": "docs/features/url-shortener/tasks/redirect-endpoint.md",
+      "status": "todo"
+    },
+    {
+      "id": "T16",
+      "title": "Add end-to-end ITs: link lifecycle, storage outage within 2 s, and auth denial parity",
+      "layer": "tests",
+      "deps": [
+        "T6",
+        "T14",
+        "T15"
+      ],
+      "acs": [
+        "AC-02",
+        "AC-08",
+        "AC-12",
+        "AC-15",
+        "AC-17",
+        "AC-17b",
+        "AC-18",
+        "AC-20"
+      ],
+      "dod": "All three ITs pass in `./mvnw -B verify` (Docker).",
+      "files_hint": [
+        "src/test/java/io/github/igorermolenko/trimly/LinkLifecycleIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/StorageOutageIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/OwnerAuthDenialIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/cross-cutting-integration-tests.md",
+      "status": "todo"
+    }
+  ]
+}

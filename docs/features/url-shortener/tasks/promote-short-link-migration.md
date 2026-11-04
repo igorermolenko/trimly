@@ -9,8 +9,8 @@ files_hint: ["docs/features/url-shortener/migrations/01_create_short_link.up.sql
 owner: "igorermolenko"
 estimate: "S"
 context_budget: "M"     # 41 inlined lines
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- To the executing agent: work from what is inlined here. If a slice is insufficient, ambiguous,

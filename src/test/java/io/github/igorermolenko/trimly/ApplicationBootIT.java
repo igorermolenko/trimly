@@ -25,7 +25,7 @@ class ApplicationBootIT {
   @Test
   void appliesAllMigrationsOnStartup() {
     assertThat(flyway.info().pending()).isEmpty();
-    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("1");
+    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("2");
   }
 
   @Test

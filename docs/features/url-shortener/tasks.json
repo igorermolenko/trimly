@@ -282,7 +282,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/api/CreateShortLinkIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/create-short-link-endpoint.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T14",

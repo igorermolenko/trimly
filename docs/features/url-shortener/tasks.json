@@ -335,7 +335,7 @@
         "src/test/java/io/github/igorermolenko/trimly/redirect/"
       ],
       "file": "docs/features/url-shortener/tasks/redirect-endpoint.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T16",

@@ -2,6 +2,7 @@ package io.github.igorermolenko.trimly;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.igorermolenko.trimly.access.app.OwnerCredentialProperties;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Import;
 class ApplicationBootIT {
 
   @Autowired Flyway flyway;
+  @Autowired OwnerCredentialProperties credential;
 
   @LocalServerPort int port;
 
@@ -38,7 +40,9 @@ class ApplicationBootIT {
     HttpResponse<String> response =
         HttpClient.newHttpClient()
             .send(
-                HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/no-such-path"))
+                HttpRequest.newBuilder(
+                        URI.create("http://localhost:" + port + "/api/v1/no-such-path"))
+                    .header("Authorization", "Bearer " + credential.ownerCredential())
                     .build(),
                 HttpResponse.BodyHandlers.ofString());
 

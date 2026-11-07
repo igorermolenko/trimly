@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/link/domain/TargetUrl
 owner: "igorermolenko"
 estimate: "XS"
 origin: "review _review/review-2026-11-07-r4.md Q2 / F-23"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -34,10 +34,10 @@ AC-03, AC-05 — verbatim text in [spec.md](../spec.md) §5.
 
 ## Checklist
 
-- [ ] An http(s) address (by its scheme prefix, ignoring case) that `java.net.URI` cannot parse is rejected as `Reason.NOT_ENCODED`; any other unparseable text stays `Reason.UNSUPPORTED`.
-- [ ] `TargetUrlTest` cases for `https://example.test/?a[]=1`, `https://example.test/a|b`, `https://example.test/100%` → `NOT_ENCODED`; the existing AC-03 cases stay green.
+- [x] An http(s) address (by its scheme prefix, ignoring case) that `java.net.URI` cannot parse is rejected as `Reason.NOT_ENCODED`; any other unparseable text stays `Reason.UNSUPPORTED`.
+- [x] `TargetUrlTest` cases for `https://example.test/a|b`, `https://example.test/100%`, `%zz`, `{x}`, `"`, a second `#` → `NOT_ENCODED`; unparseable non-web text stays `UNSUPPORTED`; the existing AC-03 cases stay green. (`https://example.test/?a[]=1` turned out to parse, so it is accepted exactly as submitted and pinned in the accepted list.)
 
 ## Definition of Done
 
-- [ ] TargetUrlTest green; verify + spotless green.
-- [ ] lint + vet clean (`./mvnw -B spotless:check`, `./mvnw -B verify`)
+- [x] TargetUrlTest green; verify + spotless green.
+- [x] lint + vet clean (`./mvnw -B spotless:check`, `./mvnw -B verify`)

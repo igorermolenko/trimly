@@ -753,7 +753,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/domain/TargetUrlTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/target-url-unparseable-not-encoded.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T40",

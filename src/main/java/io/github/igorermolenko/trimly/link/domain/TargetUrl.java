@@ -43,7 +43,9 @@ public record TargetUrl(String value) {
     try {
       uri = new URI(raw);
     } catch (URISyntaxException e) {
-      throw new TargetUrlRejected(Reason.UNSUPPORTED);
+      // A web address that only fails the strict parse carries characters that must be
+      // percent-encoded (AC-05); anything else is not a web address at all (AC-03).
+      throw new TargetUrlRejected(looksLikeWeb(raw) ? Reason.NOT_ENCODED : Reason.UNSUPPORTED);
     }
     String scheme = uri.getScheme();
     boolean web = "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
@@ -51,6 +53,11 @@ public record TargetUrl(String value) {
       throw new TargetUrlRejected(Reason.UNSUPPORTED);
     }
     return uri.getHost();
+  }
+
+  private static boolean looksLikeWeb(String raw) {
+    String lower = raw.toLowerCase(Locale.ROOT);
+    return lower.startsWith("http://") || lower.startsWith("https://");
   }
 
   private static boolean pointsTo(String host, Set<String> ownHosts) {

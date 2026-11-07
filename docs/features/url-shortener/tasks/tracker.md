@@ -46,7 +46,7 @@
 | T36 | [Give firewall-rejected owner-API answers the owner-API cache and nosniff headers](./firewall-problem-owner-headers.md) | ports | igorermolenko | XS | T33 | done | COMMIT |
 | T37 | [Sync sad.md, data-model.md, spec §8 and api-sync-report F1 with what landed](./docs-sync-sad-data-model-f1.md) | docs | igorermolenko | XS | — | done | COMMIT |
 | T38 | [Let browser-sent raw [ ] { } \| ^ ` characters reach trimly instead of Tomcat's bare 400](./tomcat-relaxed-url-chars.md) | ports | igorermolenko | S | — | done | COMMIT |
-| T39 | [Answer an unparseable http(s) target URL with the AC-05 percent-encoding guidance](./target-url-unparseable-not-encoded.md) | domain | igorermolenko | XS | — | todo | — |
+| T39 | [Answer an unparseable http(s) target URL with the AC-05 percent-encoding guidance](./target-url-unparseable-not-encoded.md) | domain | igorermolenko | XS | — | done | COMMIT |
 | T40 | [List every shared.malformed_request trigger in openapi.yaml and close the stale sad.md §11 doc-drift risk](./docs-sync-malformed-request-and-sad-risk.md) | docs | igorermolenko | XS | — | todo | — |
 
 **Total:** 40 tasks — 16 planned (~12.5 person-days) + 9 review follow-ups T17–T25 from `_review/review-2026-11-07.md` + 7 review follow-ups T26–T32 from `_review/review-2026-11-07-r2.md` + 5 review follow-ups T33–T37 from `_review/review-2026-11-07-r3.md` + 3 review follow-ups T38–T40 from `_review/review-2026-11-07-r4.md`.

@@ -23,7 +23,8 @@ class TargetUrlTest {
         "https://xn--e1afmkfd.xn--p1ai/",
         "https://nottrimly.example.test/",
         "https://example.com:8443/x",
-        "https://[2001:db8::1]/x"
+        "https://[2001:db8::1]/x",
+        "https://example.test/?a[]=1"
       })
   void acceptsAbsoluteHttpAndHttpsUrlsExactlyAsSubmitted(String raw) {
     assertThat(TargetUrl.parse(raw, OWN_HOSTS).value()).isEqualTo(raw);
@@ -74,6 +75,26 @@ class TargetUrlTest {
       })
   void rejectsSpacesControlAndNonAsciiCharactersAsNotEncoded(String raw) {
     assertRejected(raw, Reason.NOT_ENCODED);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "https://example.test/a|b",
+        "https://example.test/100%",
+        "https://example.test/%zz",
+        "HTTP://example.test/{x}",
+        "https://example.test/a\"b",
+        "https://example.test/a#b#c"
+      })
+  void rejectsAWebAddressWithUnencodedReservedCharactersAsNotEncoded(String raw) {
+    assertRejected(raw, Reason.NOT_ENCODED);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"ftp://example.test/a|b", "javascript:a|b{", "example.test/a|b"})
+  void anUnparseableNonWebAddressIsStillUnsupported(String raw) {
+    assertRejected(raw, Reason.UNSUPPORTED);
   }
 
   @ParameterizedTest

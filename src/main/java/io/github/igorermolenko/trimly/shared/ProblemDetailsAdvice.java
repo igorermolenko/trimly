@@ -1,5 +1,6 @@
 package io.github.igorermolenko.trimly.shared;
 
+import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -18,13 +19,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * The one place that turns exceptions into RFC 9457 Problem Details responses. Spring MVC's own
  * exceptions are handled by {@link ResponseEntityExceptionHandler}; anything unexpected becomes a
  * generic 500 that never exposes the exception message or stack trace. Every answer carries a
- * {@code code} (the contract's {@code Problem.required}): a module's own code when it set one, else
- * a {@code shared.*} code for the status.
+ * {@code type} ({@code about:blank} unless a module set one) and a {@code code} (the contract's
+ * {@code Problem.required}): a module's own code when it set one, else a {@code shared.*} code for
+ * the status.
  */
 @RestControllerAdvice
 class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
 
   static final String CODE = "code";
+  static final URI ABOUT_BLANK = URI.create("about:blank");
 
   private static final Logger log = LoggerFactory.getLogger(ProblemDetailsAdvice.class);
   private static final String MALFORMED_DETAIL =
@@ -54,6 +57,7 @@ class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
   ProblemDetail handleUnexpected(Exception ex) {
     log.error("Unhandled exception", ex);
     ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+    problem.setType(ABOUT_BLANK);
     problem.setProperty(CODE, "shared.internal_error");
     return problem;
   }
@@ -61,9 +65,13 @@ class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
   @Override
   protected ResponseEntity<Object> createResponseEntity(
       Object body, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-    if (body instanceof ProblemDetail problem
-        && (problem.getProperties() == null || !problem.getProperties().containsKey(CODE))) {
-      problem.setProperty(CODE, fallbackCode(status));
+    if (body instanceof ProblemDetail problem) {
+      if (problem.getType() == null) {
+        problem.setType(ABOUT_BLANK);
+      }
+      if (problem.getProperties() == null || !problem.getProperties().containsKey(CODE)) {
+        problem.setProperty(CODE, fallbackCode(status));
+      }
     }
     return super.createResponseEntity(body, headers, status, request);
   }

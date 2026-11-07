@@ -32,6 +32,6 @@
 | T22 | [Keep Spring Security's no-cache headers on the owner API](./owner-api-cache-headers.md) | ports | igorermolenko | S | T21 | done | COMMIT |
 | T23 | [Give every owner-API Problem a code; a wrong Content-Type is shared.malformed_request](./problem-codes-everywhere.md) | ports | igorermolenko | M | — | done | COMMIT |
 | T24 | [Write the missing test-plan tests for AC-20b, AC-20, AC-19, AC-18, AC-11 and AC-04](./test-plan-gaps.md) | tests | igorermolenko | M | T23 | done | COMMIT |
-| T25 | [Validate owner-API responses against contracts/openapi.yaml](./contract-response-validation.md) | tests | igorermolenko | S | T23, T24 | todo | — |
+| T25 | [Validate owner-API responses against contracts/openapi.yaml](./contract-response-validation.md) | tests | igorermolenko | S | T23, T24 | done | COMMIT |
 
 **Total:** 25 tasks — 16 planned (~12.5 person-days) + 9 review follow-ups T17–T25 from `_review/review-2026-11-07.md`.

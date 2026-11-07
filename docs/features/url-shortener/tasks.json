@@ -528,7 +528,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/api/OwnerApiContractIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/contract-response-validation.md",
-      "status": "todo"
+      "status": "done"
     }
   ]
 }

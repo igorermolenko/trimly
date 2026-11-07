@@ -13,6 +13,7 @@ class ProblemDetailsAdviceTest {
         new ProblemDetailsAdvice().handleUnexpected(new IllegalStateException("secret detail"));
 
     assertThat(problem.getStatus()).isEqualTo(500);
+    assertThat(problem.getType()).hasToString("about:blank");
     assertThat(problem.getProperties()).containsEntry("code", "shared.internal_error");
     assertThat(problem.getDetail()).isNull();
   }

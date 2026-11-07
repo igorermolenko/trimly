@@ -36,7 +36,7 @@
 | T26 | [Prove a storage wake within 2 s still gives the visitor a normal redirect](./slow-wake-redirect-it.md) | tests | igorermolenko | S | — | done | COMMIT |
 | T27 | [Answer firewall-rejected owner-API addresses with Problem Details shared.malformed_request](./owner-api-firewall-problem.md) | ports | igorermolenko | S | — | done | COMMIT |
 | T28 | [Answer GET / with the plain-text "Link not found."](./root-path-not-found.md) | ports | igorermolenko | S | T27 | done | COMMIT |
-| T29 | [Pin that production short codes come from SecureRandom](./secure-random-source.md) | app | igorermolenko | S | — | todo | — |
+| T29 | [Pin that production short codes come from SecureRandom](./secure-random-source.md) | app | igorermolenko | S | — | done | COMMIT |
 | T30 | [Pin that the owner credential never reaches the logs](./credential-never-logged.md) | tests | igorermolenko | S | — | todo | — |
 | T31 | [Sync spec.md with ADR-0006 and sad.md §8 (15-minute probe, closed open questions)](./spec-sync-probe-and-open-questions.md) | docs | igorermolenko | XS | — | todo | — |
 | T32 | [Record the shared.* Problem codes in api-sync-report.md](./api-sync-report-codes.md) | docs | igorermolenko | XS | T27 | todo | — |

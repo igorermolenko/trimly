@@ -593,7 +593,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/app/LinkConfigurationTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/secure-random-source.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T30",

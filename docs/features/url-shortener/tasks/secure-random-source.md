@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/link/app/LinkConfigur
 owner: "igorermolenko"
 estimate: "S"
 origin: "review _review/review-2026-11-07-r2.md N4 / F-13"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the

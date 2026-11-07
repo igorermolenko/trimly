@@ -33,7 +33,7 @@
 | T23 | [Give every owner-API Problem a code; a wrong Content-Type is shared.malformed_request](./problem-codes-everywhere.md) | ports | igorermolenko | M | — | done | COMMIT |
 | T24 | [Write the missing test-plan tests for AC-20b, AC-20, AC-19, AC-18, AC-11 and AC-04](./test-plan-gaps.md) | tests | igorermolenko | M | T23 | done | COMMIT |
 | T25 | [Validate owner-API responses against contracts/openapi.yaml](./contract-response-validation.md) | tests | igorermolenko | S | T23, T24 | done | COMMIT |
-| T26 | [Prove a storage wake within 2 s still gives the visitor a normal redirect](./slow-wake-redirect-it.md) | tests | igorermolenko | S | — | todo | — |
+| T26 | [Prove a storage wake within 2 s still gives the visitor a normal redirect](./slow-wake-redirect-it.md) | tests | igorermolenko | S | — | done | COMMIT |
 | T27 | [Answer firewall-rejected owner-API addresses with Problem Details shared.malformed_request](./owner-api-firewall-problem.md) | ports | igorermolenko | S | — | todo | — |
 | T28 | [Answer GET / with the plain-text "Link not found."](./root-path-not-found.md) | ports | igorermolenko | S | T27 | todo | — |
 | T29 | [Pin that production short codes come from SecureRandom](./secure-random-source.md) | app | igorermolenko | S | — | todo | — |

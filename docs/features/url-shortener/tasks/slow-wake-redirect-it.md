@@ -9,8 +9,8 @@ files_hint: ["src/test/java/io/github/igorermolenko/trimly/StorageOutageIT.java"
 owner: "igorermolenko"
 estimate: "S"
 origin: "review _review/review-2026-11-07-r2.md N1 / F-10"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the

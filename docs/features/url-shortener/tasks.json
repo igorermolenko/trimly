@@ -543,7 +543,7 @@
         "src/test/java/io/github/igorermolenko/trimly/StorageOutageIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/slow-wake-redirect-it.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T27",

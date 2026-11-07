@@ -3,6 +3,7 @@ package io.github.igorermolenko.trimly;
 import static io.github.igorermolenko.trimly.HttpTestClient.json;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.igorermolenko.trimly.access.app.OwnerCredentialProperties;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -29,11 +30,13 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 class StorageOutageIT {
 
   private static final Duration BUDGET = Duration.ofSeconds(2);
+  private static final Duration WAKE = Duration.ofMillis(1000);
 
   @LocalServerPort int port;
   @Autowired OwnerCredentialProperties credential;
   @Autowired PostgreSQLContainer postgres;
   @Autowired JdbcTemplate jdbc;
+  @Autowired HikariDataSource dataSource;
 
   private HttpTestClient client;
   private boolean paused;
@@ -45,7 +48,7 @@ class StorageOutageIT {
   }
 
   @AfterEach
-  void unpause() {
+  synchronized void unpause() {
     if (paused) {
       DockerClientFactory.instance().client().unpauseContainerCmd(postgres.getContainerId()).exec();
       paused = false;
@@ -108,6 +111,28 @@ class StorageOutageIT {
   }
 
   @Test
+  @DisplayName("AC-17: storage that wakes within 2 s still gives the visitor the normal redirect")
+  void aVisitorArrivingDuringAWakeWithinTwoSecondsIsRedirected() throws Exception {
+    String code = create();
+    emptyThePool();
+    pause();
+    // Like a scaled-to-zero Neon: the new connection's login stalls until storage wakes up.
+    Thread waker =
+        Thread.ofVirtual()
+            .start(() -> {
+              sleepQuietly(WAKE);
+              unpause();
+            });
+
+    HttpResponse<String> response = timed("visit during wake", () -> client.visit("/" + code));
+    waker.join();
+
+    assertThat(response.statusCode()).isEqualTo(302);
+    assertThat(response.headers().allValues("Location")).containsExactly("https://example.test/");
+    assertThat(response.headers().allValues("Cache-Control")).containsExactly("no-store");
+  }
+
+  @Test
   @DisplayName("AC-16b during AC-17: a malformed code is still 'link not found'")
   void aMalformedCodeIsStillNotFoundDuringTheOutage() {
     pause();
@@ -134,8 +159,26 @@ class StorageOutageIT {
     return response;
   }
 
-  private void pause() {
+  private synchronized void pause() {
     DockerClientFactory.instance().client().pauseContainerCmd(postgres.getContainerId()).exec();
     paused = true;
+  }
+
+  private void emptyThePool() throws InterruptedException {
+    dataSource.getHikariPoolMXBean().softEvictConnections();
+    long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+    while (dataSource.getHikariPoolMXBean().getTotalConnections() > 0
+        && System.nanoTime() < deadline) {
+      Thread.sleep(10);
+    }
+    assertThat(dataSource.getHikariPoolMXBean().getTotalConnections()).isZero();
+  }
+
+  private static void sleepQuietly(Duration duration) {
+    try {
+      Thread.sleep(duration);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 }

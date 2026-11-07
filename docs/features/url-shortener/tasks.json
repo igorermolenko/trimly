@@ -364,6 +364,171 @@
       ],
       "file": "docs/features/url-shortener/tasks/cross-cutting-integration-tests.md",
       "status": "done"
+    },
+    {
+      "id": "T17",
+      "title": "Re-split the storage budget so a wake within 2 s is answered normally",
+      "layer": "wiring",
+      "deps": [],
+      "acs": [
+        "AC-17",
+        "AC-17b"
+      ],
+      "dod": "StorageTimeBudgetIT green incl. a new slow-wake case; StorageOutageIT still <= 2 s; `./mvnw -B verify` + spotless green.",
+      "files_hint": [
+        "src/main/resources/application.yml",
+        "src/main/java/io/github/igorermolenko/trimly/link/infra/StorageConnectionConfiguration.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/infra/StorageTimeBudgetIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/storage-wake-window.md",
+      "status": "todo"
+    },
+    {
+      "id": "T18",
+      "title": "Run Flyway migrations on their own connection, outside the request budget",
+      "layer": "wiring",
+      "deps": [
+        "T17"
+      ],
+      "acs": [],
+      "dod": "Flyway connection has no statement/network timeout (test); ApplicationBootIT green; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/infra/StorageConnectionConfiguration.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/infra/StorageTimeBudgetIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/flyway-own-connection.md",
+      "status": "todo"
+    },
+    {
+      "id": "T19",
+      "title": "Count the public base URL host as an own host; no localhost defaults in production config",
+      "layer": "app",
+      "deps": [
+        "T18"
+      ],
+      "acs": [
+        "AC-06",
+        "AC-01"
+      ],
+      "dod": "LinkPropertiesTest covers the new rule; main application.yml has no localhost trimly defaults; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/app/LinkProperties.java",
+        "src/main/resources/application.yml",
+        "src/test/resources/config/application.yml",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/LinkPropertiesTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/public-host-is-own-host.md",
+      "status": "todo"
+    },
+    {
+      "id": "T20",
+      "title": "Expose the liveness-only health group ADR-0006 decides",
+      "layer": "wiring",
+      "deps": [
+        "T19"
+      ],
+      "acs": [],
+      "dod": "Liveness IT green; verify + spotless green.",
+      "files_hint": [
+        "src/main/resources/application.yml",
+        "src/test/java/io/github/igorermolenko/trimly/link/infra/StorageTimeBudgetIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/liveness-health-group.md",
+      "status": "todo"
+    },
+    {
+      "id": "T21",
+      "title": "Answer firewall-rejected visitor paths with the plain-text \"Link not found.\"",
+      "layer": "ports",
+      "deps": [],
+      "acs": [
+        "AC-16b"
+      ],
+      "dod": "RedirectIT green incl. firewall cases; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/redirect/api/VisitorRequestRejectedHandler.java",
+        "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/firewall-rejected-visitor-paths.md",
+      "status": "todo"
+    },
+    {
+      "id": "T22",
+      "title": "Keep Spring Security's no-cache headers on the owner API",
+      "layer": "ports",
+      "deps": [
+        "T21"
+      ],
+      "acs": [],
+      "dod": "OwnerApiSecurityIT + RedirectIT green; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/access/api/SecurityConfiguration.java",
+        "src/test/java/io/github/igorermolenko/trimly/access/api/OwnerApiSecurityIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/owner-api-cache-headers.md",
+      "status": "todo"
+    },
+    {
+      "id": "T23",
+      "title": "Give every owner-API Problem a code; a wrong Content-Type is shared.malformed_request",
+      "layer": "ports",
+      "deps": [],
+      "acs": [],
+      "dod": "ProblemDetailsAdviceIT green; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/shared/ProblemDetailsAdvice.java",
+        "docs/features/url-shortener/contracts/openapi.yaml",
+        "src/test/java/io/github/igorermolenko/trimly/shared/ProblemDetailsAdviceIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/problem-codes-everywhere.md",
+      "status": "todo"
+    },
+    {
+      "id": "T24",
+      "title": "Write the missing test-plan tests for AC-20b, AC-20, AC-19, AC-18, AC-11 and AC-04",
+      "layer": "tests",
+      "deps": [
+        "T23"
+      ],
+      "acs": [
+        "AC-20b",
+        "AC-20",
+        "AC-19",
+        "AC-18",
+        "AC-11",
+        "AC-04"
+      ],
+      "dod": "All new tests green and each shown red under a mutation; verify + spotless green.",
+      "files_hint": [
+        "src/test/java/io/github/igorermolenko/trimly/link/app/CreateShortLinkIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/infra/ShortLinkStoreIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/access/api/OwnerCredentialFilterTest.java",
+        "src/test/java/io/github/igorermolenko/trimly/LinkLifecycleIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/api/CreateShortLinkIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/test-plan-gaps.md",
+      "status": "todo"
+    },
+    {
+      "id": "T25",
+      "title": "Validate owner-API responses against contracts/openapi.yaml",
+      "layer": "tests",
+      "deps": [
+        "T23",
+        "T24"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-09"
+      ],
+      "dod": "OwnerApiContractIT green, and red when a response field is renamed; verify + spotless green.",
+      "files_hint": [
+        "pom.xml",
+        "src/test/java/io/github/igorermolenko/trimly/link/api/OwnerApiContractIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/contract-response-validation.md",
+      "status": "todo"
     }
   ]
 }

@@ -434,7 +434,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/infra/StorageTimeBudgetIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/liveness-health-group.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T21",

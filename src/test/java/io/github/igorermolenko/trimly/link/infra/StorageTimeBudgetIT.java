@@ -135,17 +135,29 @@ class StorageTimeBudgetIT {
   void healthStaysUpWithoutTouchingStorage() throws Exception {
     pause();
 
-    HttpResponse<String> response =
-        HttpClient.newHttpClient()
-            .send(
-                HttpRequest.newBuilder(
-                        URI.create("http://localhost:" + managementPort + "/actuator/health"))
-                    .timeout(BUDGET)
-                    .build(),
-                HttpResponse.BodyHandlers.ofString());
+    HttpResponse<String> response = health("/actuator/health");
 
     assertThat(response.statusCode()).isEqualTo(200);
     assertThat(response.body()).contains("\"UP\"").doesNotContain("\"db\"");
+  }
+
+  @Test
+  void theLivenessGroupMachineChecksUseIsUpWithStoragePaused() throws Exception {
+    pause();
+
+    HttpResponse<String> response = health("/actuator/health/liveness");
+
+    assertThat(response.statusCode()).isEqualTo(200);
+    assertThat(response.body()).isEqualTo("{\"status\":\"UP\"}");
+  }
+
+  private HttpResponse<String> health(String path) throws Exception {
+    return HttpClient.newHttpClient()
+        .send(
+            HttpRequest.newBuilder(URI.create("http://localhost:" + managementPort + path))
+                .timeout(BUDGET)
+                .build(),
+            HttpResponse.BodyHandlers.ofString());
   }
 
   private synchronized void pause() {

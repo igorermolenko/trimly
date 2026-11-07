@@ -121,7 +121,14 @@ class RedirectIT {
     HttpResponse<String> response = get("/api/v1/links;x=1");
 
     assertThat(response.statusCode()).isEqualTo(400);
-    assertThat(response.body()).doesNotContain(NOT_FOUND);
+    assertThat(response.headers().firstValue("Content-Type"))
+        .hasValueSatisfying(type -> assertThat(type).startsWith("application/problem+json"));
+    assertThat(response.body())
+        .contains("\"code\":\"shared.malformed_request\"")
+        .contains("\"type\":\"about:blank\"")
+        .doesNotContain(NOT_FOUND)
+        .doesNotContain("Exception")
+        .doesNotContain("timestamp");
   }
 
   @Test

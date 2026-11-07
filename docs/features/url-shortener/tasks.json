@@ -559,7 +559,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/api/OwnerApiContractIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/owner-api-firewall-problem.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T28",

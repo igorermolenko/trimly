@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -51,6 +52,20 @@ class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
       HttpStatusCode status,
       WebRequest request) {
     return malformed(ex, new HttpHeaders(), request);
+  }
+
+  /**
+   * An owner-API address Spring Security's firewall rejected (a {@code ;}, an encoded {@code /} or
+   * {@code %}) can never name an operation: {@code code: shared.malformed_request}.
+   */
+  @ExceptionHandler(RequestRejectedException.class)
+  ProblemDetail handleRejectedAddress(RequestRejectedException ex) {
+    ProblemDetail problem =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, "The request address is not valid.");
+    problem.setType(ABOUT_BLANK);
+    problem.setProperty(CODE, "shared.malformed_request");
+    return problem;
   }
 
   @ExceptionHandler(Exception.class)

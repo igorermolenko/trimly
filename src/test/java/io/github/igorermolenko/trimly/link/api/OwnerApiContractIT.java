@@ -101,7 +101,10 @@ class OwnerApiContractIT {
             client.owner("GET", "/api/v1/links?limit=0", null),
             client.owner("POST", "/api/v1/links/zzzzzzz/disable", null),
             client.owner("DELETE", "/api/v1/links", null),
-            client.withAuthorization("GET", "/api/v1/links", null, null));
+            client.withAuthorization("GET", "/api/v1/links", null, null),
+            // Addresses Spring Security's firewall rejects before any controller runs.
+            client.owner("POST", "/api/v1/links/ab%2Fcdef/disable", null),
+            client.owner("POST", "/api/v1/links/abc2345;/enable", null));
 
     problems.forEach(problem -> {
       assertThat(problem.statusCode()).isBetween(400, 499);

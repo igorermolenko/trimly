@@ -31,6 +31,11 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  # Request bodies are closed (openapi.yaml: additionalProperties: false): an unknown member,
+  # including a misspelt one, is a malformed request, not silently dropped.
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
 
 # trimly.public-base-url and trimly.own-hosts have no defaults: production must set
 # TRIMLY_PUBLIC_BASE_URL and TRIMLY_OWN_HOSTS (domain: roadmap D2), or trimly refuses to start.

@@ -42,7 +42,7 @@
 | T32 | [Record the shared.* Problem codes in api-sync-report.md](./api-sync-report-codes.md) | docs | igorermolenko | XS | T27 | done | COMMIT |
 | T33 | [Answer a direct GET /error with the plain-text "Link not found."](./error-path-not-found.md) | ports | igorermolenko | S | — | done | COMMIT |
 | T34 | [Answer GET /api and /api/ for the owner with a Problem Details 404](./api-root-problem.md) | ports | igorermolenko | XS | T33 | done | COMMIT |
-| T35 | [Reject unknown members in a create request as shared.malformed_request](./reject-unknown-create-members.md) | ports | igorermolenko | S | T34 | todo | — |
+| T35 | [Reject unknown members in a create request as shared.malformed_request](./reject-unknown-create-members.md) | ports | igorermolenko | S | T34 | done | COMMIT |
 | T36 | [Give firewall-rejected owner-API answers the owner-API cache and nosniff headers](./firewall-problem-owner-headers.md) | ports | igorermolenko | XS | T33 | done | COMMIT |
 | T37 | [Sync sad.md, data-model.md, spec §8 and api-sync-report F1 with what landed](./docs-sync-sad-data-model-f1.md) | docs | igorermolenko | XS | — | todo | — |
 

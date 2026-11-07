@@ -78,6 +78,8 @@ class CreateShortLinkIT {
         "{\"targetUrl\":\" https://example.test/\"}|link.target_url_not_encoded|The target URL must be properly encoded: non-Latin hosts in their ASCII xn-- form, other characters percent-encoded.",
         "{\"targetUrl\":\"https://trimly.example.test/abc2345\"}|link.target_url_points_to_trimly|A short link cannot point back to trimly.",
         "[]|shared.malformed_request|",
+        "{\"targetUrl\":\"https://example.test/\",\"extra\":1}|shared.malformed_request|",
+        "{\"targetURL\":\"https://example.test/\"}|shared.malformed_request|",
         "not json|shared.malformed_request|"
       })
   void rejectsABadRequestWithItsProblemCode(String body, String code, String detail)

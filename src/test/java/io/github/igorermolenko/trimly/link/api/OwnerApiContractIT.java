@@ -98,6 +98,8 @@ class OwnerApiContractIT {
         List.of(
             create("ftp://example.test/"),
             client.owner("POST", "/api/v1/links", "not json"),
+            client.owner(
+                "POST", "/api/v1/links", "{\"targetUrl\":\"https://example.test/\",\"x\":1}"),
             client.owner("GET", "/api/v1/links?limit=0", null),
             client.owner("POST", "/api/v1/links/zzzzzzz/disable", null),
             client.owner("DELETE", "/api/v1/links", null),

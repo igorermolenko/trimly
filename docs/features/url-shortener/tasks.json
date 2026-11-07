@@ -687,7 +687,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/api/OwnerApiContractIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/reject-unknown-create-members.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T36",

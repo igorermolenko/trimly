@@ -26,7 +26,7 @@
 | T16 | [Add end-to-end ITs: link lifecycle, storage outage within 2 s, and auth denial parity](./cross-cutting-integration-tests.md) | tests | igorermolenko | M | T6, T14, T15 | done | COMMIT |
 | T17 | [Re-split the storage budget so a wake within 2 s is answered normally](./storage-wake-window.md) | wiring | igorermolenko | M | — | done | COMMIT |
 | T18 | [Run Flyway migrations on their own connection, outside the request budget](./flyway-own-connection.md) | wiring | igorermolenko | S | T17 | done | COMMIT |
-| T19 | [Count the public base URL host as an own host; no localhost defaults in production config](./public-host-is-own-host.md) | app | igorermolenko | S | T18 | todo | — |
+| T19 | [Count the public base URL host as an own host; no localhost defaults in production config](./public-host-is-own-host.md) | app | igorermolenko | S | T18 | done | COMMIT |
 | T20 | [Expose the liveness-only health group ADR-0006 decides](./liveness-health-group.md) | wiring | igorermolenko | S | T19 | todo | — |
 | T21 | [Answer firewall-rejected visitor paths with the plain-text "Link not found."](./firewall-rejected-visitor-paths.md) | ports | igorermolenko | S | — | todo | — |
 | T22 | [Keep Spring Security's no-cache headers on the owner API](./owner-api-cache-headers.md) | ports | igorermolenko | S | T21 | todo | — |

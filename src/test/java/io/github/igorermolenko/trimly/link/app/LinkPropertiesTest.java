@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 
 class LinkPropertiesTest {
 
@@ -28,6 +30,27 @@ class LinkPropertiesTest {
           assertThat(properties.shortUrlFor("abc2345"))
               .isEqualTo("https://trimly.example.test/abc2345");
         });
+  }
+
+  @Test
+  void thePublicBaseUrlHostIsAlwaysAnOwnHost() {
+    runner
+        .withPropertyValues(
+            "trimly.public-base-url=https://sho.example.test", "trimly.own-hosts=localhost")
+        .run(context ->
+            assertThat(context.getBean(LinkProperties.class).ownHosts())
+                .containsExactlyInAnyOrder("sho.example.test", "localhost"));
+  }
+
+  @Test
+  void productionConfigurationHasNoLocalhostDefaults() throws Exception {
+    var main =
+        new YamlPropertySourceLoader()
+            .load("main", new ClassPathResource("application.yml"))
+            .getFirst();
+
+    assertThat(main.getProperty("trimly.public-base-url")).isNull();
+    assertThat(main.getProperty("trimly.own-hosts[0]")).isNull();
   }
 
   @Test

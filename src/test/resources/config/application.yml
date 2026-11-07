@@ -3,3 +3,7 @@
 trimly:
   # A throwaway owner credential that satisfies OwnerCredentialPolicy; not a real secret.
   owner-credential: "test-owner-credential-Zq3!vR8#mK2$wT6%yH9&nB4"
+  # Local addresses for tests and `spring-boot:test-run`; production sets its own (no defaults).
+  public-base-url: http://localhost:8080
+  own-hosts:
+    - localhost

@@ -1,6 +1,7 @@
 package io.github.igorermolenko.trimly.link.app;
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -9,7 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @param publicBaseUrl the single public address every full short link is built from, whatever host
  *     a request arrived on (AC-01): absolute http/https, no trailing slash
- * @param ownHosts trimly's own hosts, which target URLs may not point to (AC-06)
+ * @param ownHosts trimly's own hosts, which target URLs may not point to (AC-06); always includes
+ *     the public base URL's host, so a short link can never point at another short link
  */
 @ConfigurationProperties("trimly")
 public record LinkProperties(URI publicBaseUrl, Set<String> ownHosts) {
@@ -26,7 +28,9 @@ public record LinkProperties(URI publicBaseUrl, Set<String> ownHosts) {
     if (ownHosts == null || ownHosts.isEmpty()) {
       throw new IllegalArgumentException("trimly.own-hosts must name at least one host");
     }
-    ownHosts = Set.copyOf(ownHosts);
+    Set<String> hosts = new HashSet<>(ownHosts);
+    hosts.add(publicBaseUrl.getHost());
+    ownHosts = Set.copyOf(hosts);
   }
 
   /** The full short link for {@code shortCode}. */

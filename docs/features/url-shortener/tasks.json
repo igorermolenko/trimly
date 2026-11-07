@@ -418,7 +418,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/app/LinkPropertiesTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/public-host-is-own-host.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T20",

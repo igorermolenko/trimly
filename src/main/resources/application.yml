@@ -32,13 +32,12 @@ spring:
     problemdetails:
       enabled: true
 
-# Local defaults; production sets TRIMLY_PUBLIC_BASE_URL and TRIMLY_OWN_HOSTS (domain: roadmap D2).
+# trimly.public-base-url and trimly.own-hosts have no defaults: production must set
+# TRIMLY_PUBLIC_BASE_URL and TRIMLY_OWN_HOSTS (domain: roadmap D2), or trimly refuses to start.
+# Local and test values live in src/test/resources/config/application.yml.
 trimly:
   storage:
     statement-network-timeout: 600ms
-  public-base-url: http://localhost:8080
-  own-hosts:
-    - localhost
 
 server:
   error:

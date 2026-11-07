@@ -43,7 +43,7 @@
 | T33 | [Answer a direct GET /error with the plain-text "Link not found."](./error-path-not-found.md) | ports | igorermolenko | S | — | done | COMMIT |
 | T34 | [Answer GET /api and /api/ for the owner with a Problem Details 404](./api-root-problem.md) | ports | igorermolenko | XS | T33 | todo | — |
 | T35 | [Reject unknown members in a create request as shared.malformed_request](./reject-unknown-create-members.md) | ports | igorermolenko | S | T34 | todo | — |
-| T36 | [Give firewall-rejected owner-API answers the owner-API cache and nosniff headers](./firewall-problem-owner-headers.md) | ports | igorermolenko | XS | T33 | todo | — |
+| T36 | [Give firewall-rejected owner-API answers the owner-API cache and nosniff headers](./firewall-problem-owner-headers.md) | ports | igorermolenko | XS | T33 | done | COMMIT |
 | T37 | [Sync sad.md, data-model.md, spec §8 and api-sync-report F1 with what landed](./docs-sync-sad-data-model-f1.md) | docs | igorermolenko | XS | — | todo | — |
 
 **Total:** 37 tasks — 16 planned (~12.5 person-days) + 9 review follow-ups T17–T25 from `_review/review-2026-11-07.md` + 7 review follow-ups T26–T32 from `_review/review-2026-11-07-r2.md` + 5 review follow-ups T33–T37 from `_review/review-2026-11-07-r3.md`.

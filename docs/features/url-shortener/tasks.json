@@ -703,7 +703,7 @@
         "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/firewall-problem-owner-headers.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T37",

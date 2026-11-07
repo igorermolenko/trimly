@@ -138,6 +138,10 @@ class RedirectIT {
         .doesNotContain(NOT_FOUND)
         .doesNotContain("Exception")
         .doesNotContain("timestamp");
+    // The same no-cache and nosniff headers as every other owner-API answer.
+    assertThat(response.headers().allValues("Cache-Control"))
+        .containsExactly("no-cache, no-store, max-age=0, must-revalidate");
+    assertThat(response.headers().allValues("X-Content-Type-Options")).containsExactly("nosniff");
   }
 
   @Test

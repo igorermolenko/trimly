@@ -736,7 +736,7 @@
         "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/tomcat-relaxed-url-chars.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T39",

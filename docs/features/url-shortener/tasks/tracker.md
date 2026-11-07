@@ -45,7 +45,7 @@
 | T35 | [Reject unknown members in a create request as shared.malformed_request](./reject-unknown-create-members.md) | ports | igorermolenko | S | T34 | done | COMMIT |
 | T36 | [Give firewall-rejected owner-API answers the owner-API cache and nosniff headers](./firewall-problem-owner-headers.md) | ports | igorermolenko | XS | T33 | done | COMMIT |
 | T37 | [Sync sad.md, data-model.md, spec §8 and api-sync-report F1 with what landed](./docs-sync-sad-data-model-f1.md) | docs | igorermolenko | XS | — | done | COMMIT |
-| T38 | [Let browser-sent raw [ ] { } \| ^ ` characters reach trimly instead of Tomcat's bare 400](./tomcat-relaxed-url-chars.md) | ports | igorermolenko | S | — | todo | — |
+| T38 | [Let browser-sent raw [ ] { } \| ^ ` characters reach trimly instead of Tomcat's bare 400](./tomcat-relaxed-url-chars.md) | ports | igorermolenko | S | — | done | COMMIT |
 | T39 | [Answer an unparseable http(s) target URL with the AC-05 percent-encoding guidance](./target-url-unparseable-not-encoded.md) | domain | igorermolenko | XS | — | todo | — |
 | T40 | [List every shared.malformed_request trigger in openapi.yaml and close the stale sad.md §11 doc-drift risk](./docs-sync-malformed-request-and-sad-risk.md) | docs | igorermolenko | XS | — | todo | — |
 

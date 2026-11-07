@@ -12,10 +12,18 @@ import io.github.igorermolenko.trimly.link.app.LinkLookup;
 import io.github.igorermolenko.trimly.link.app.Resolution;
 import io.github.igorermolenko.trimly.link.domain.ShortLink;
 import io.github.igorermolenko.trimly.link.infra.ShortLinkStore;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -144,6 +152,36 @@ class RedirectIT {
     assertThat(response.headers().allValues("X-Content-Type-Options")).containsExactly("nosniff");
   }
 
+  // Browsers send these characters unencoded in the query (and | [ ] ^ in the path), and
+  // java.net.URI refuses them, so these cases go over a raw socket (review r4 Q1).
+  @ParameterizedTest
+  @ValueSource(strings = {"?a[]=1", "?q={x}", "?a=1|2", "?a=^", "?a=`b`", "/?a[0]=1"})
+  void aQueryWithRawBrowserCharactersIsStillIgnored(String suffix) throws Exception {
+    ShortLink link = stored(aShortLink().withTargetUrl("https://example.test/x").build());
+
+    RawResponse response = rawGet("/" + link.shortCode().value() + suffix);
+
+    assertThat(response.status()).isEqualTo(302);
+    assertThat(response.headers("Location")).containsExactly("https://example.test/x");
+    assertThat(response.headers("Cache-Control")).containsExactly("no-store");
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"/abc|234", "/abc[234", "/abc]234", "/abc^234", "/[abc2345]"})
+  void aPathWithRawBrowserCharactersIsNotFoundWithoutAStorageLookup(String path) throws Exception {
+    clearInvocations(store);
+
+    RawResponse response = rawGet(path);
+
+    assertThat(response.status()).isEqualTo(404);
+    assertThat(response.body()).isEqualTo(NOT_FOUND);
+    assertThat(response.headers("Content-Type"))
+        .singleElement()
+        .satisfies(type -> assertThat(type).startsWith("text/plain"));
+    assertThat(response.headers("Cache-Control")).containsExactly("no-store");
+    verifyNoInteractions(store);
+  }
+
   @Test
   void storageUnavailableIsTheTryAgainLaterSentence() throws Exception {
     doReturn(Resolution.Unavailable.INSTANCE).when(lookup).resolve(any());
@@ -174,5 +212,56 @@ class RedirectIT {
   private ShortLink stored(ShortLink link) {
     store.insert(link);
     return link;
+  }
+
+  private record RawResponse(int status, List<String[]> headerLines, String body) {
+    List<String> headers(String name) {
+      return headerLines.stream().filter(h -> h[0].equalsIgnoreCase(name)).map(h -> h[1]).toList();
+    }
+  }
+
+  /** Sends the request target byte for byte, without any client-side validation or encoding. */
+  private RawResponse rawGet(String target) throws Exception {
+    try (Socket socket = new Socket("localhost", port)) {
+      OutputStream out = socket.getOutputStream();
+      out.write(
+          ("GET " + target + " HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n")
+              .getBytes(StandardCharsets.ISO_8859_1));
+      out.flush();
+      InputStream in = socket.getInputStream();
+      ByteArrayOutputStream raw = new ByteArrayOutputStream();
+      in.transferTo(raw);
+      String text = raw.toString(StandardCharsets.ISO_8859_1);
+      int split = text.indexOf("\r\n\r\n");
+      String[] head = text.substring(0, split).split("\r\n");
+      List<String[]> headers = new ArrayList<>();
+      boolean chunked = false;
+      for (int i = 1; i < head.length; i++) {
+        int colon = head[i].indexOf(':');
+        String name = head[i].substring(0, colon).trim();
+        String value = head[i].substring(colon + 1).trim();
+        headers.add(new String[] {name, value});
+        chunked |=
+            name.equalsIgnoreCase("Transfer-Encoding")
+                && value.toLowerCase(Locale.ROOT).contains("chunked");
+      }
+      String body = text.substring(split + 4);
+      return new RawResponse(
+          Integer.parseInt(head[0].split(" ")[1]), headers, chunked ? unchunk(body) : body);
+    }
+  }
+
+  private static String unchunk(String body) {
+    StringBuilder out = new StringBuilder();
+    int at = 0;
+    while (true) {
+      int lineEnd = body.indexOf("\r\n", at);
+      int size = Integer.parseInt(body.substring(at, lineEnd).trim(), 16);
+      if (size == 0) {
+        return out.toString();
+      }
+      out.append(body, lineEnd + 2, lineEnd + 2 + size);
+      at = lineEnd + 2 + size + 2;
+    }
   }
 }

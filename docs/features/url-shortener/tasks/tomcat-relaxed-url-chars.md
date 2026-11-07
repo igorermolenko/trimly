@@ -9,8 +9,8 @@ files_hint: ["src/main/resources/application.yml", "src/test/java/io/github/igor
 owner: "igorermolenko"
 estimate: "S"
 origin: "review _review/review-2026-11-07-r4.md Q1 / F-22"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -34,10 +34,10 @@ AC-07, AC-16b — verbatim text in [spec.md](../spec.md) §5; contract in [opena
 
 ## Checklist
 
-- [ ] Set `server.tomcat.relaxed-query-chars` and `server.tomcat.relaxed-path-chars` in `application.yml`. Whatever the Spring Security firewall still rejects is answered by `VisitorRequestRejectedHandler`.
-- [ ] Add `RedirectIT` cases sent over a raw socket (`java.net.URI` refuses these characters): a valid code with `?a[]=1` (and `{x}`, `|`, `^`, `` ` ``) → 302 with the exact `Location` and `no-store`; `/abc|234` → 404 "Link not found." with `no-store` and no storage lookup.
+- [x] Set `server.tomcat.relaxed-query-chars` and `server.tomcat.relaxed-path-chars` in `application.yml`. Whatever the Spring Security firewall still rejects is answered by `VisitorRequestRejectedHandler`.
+- [x] Add `RedirectIT` cases sent over a raw socket (`java.net.URI` refuses these characters): a valid code with `?a[]=1` (and `{x}`, `|`, `^`, `` ` ``) → 302 with the exact `Location` and `no-store`; `/abc|234` → 404 "Link not found." with `no-store` and no storage lookup.
 
 ## Definition of Done
 
-- [ ] RedirectIT green with the raw-socket cases; verify + spotless green.
-- [ ] lint + vet clean (`./mvnw -B spotless:check`, `./mvnw -B verify`)
+- [x] RedirectIT green with the raw-socket cases; verify + spotless green.
+- [x] lint + vet clean (`./mvnw -B spotless:check`, `./mvnw -B verify`)

@@ -81,9 +81,11 @@ paths:
             "target URL breaks a rule"). One `code` per rule:
             - `link.target_url_unsupported` — not an absolute http/https address with a host, or `targetUrl` missing/empty (AC-03);
             - `link.target_url_too_long` — more than 2048 characters as submitted (AC-04);
-            - `link.target_url_not_encoded` — spaces, line breaks, control or non-ASCII characters (AC-05);
+            - `link.target_url_not_encoded` — spaces, line breaks, control or non-ASCII characters, or an http/https address with other characters that must be percent-encoded (for example `|`, `{`, a bare `%`) (AC-05);
             - `link.target_url_points_to_trimly` — host is one of trimly's own hosts or a subdomain (AC-06);
-            - `shared.malformed_request` — the body is not a JSON object.
+            - `shared.malformed_request` — the body is not a JSON object, the Content-Type is missing or not JSON,
+              the body carries a member other than `targetUrl` (including a misspelt one), or the address is one
+              Spring Security's firewall rejects.
           content:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }

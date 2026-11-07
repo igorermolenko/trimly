@@ -9,8 +9,8 @@ files_hint: ["docs/features/url-shortener/contracts/openapi.yaml", "docs/feature
 owner: "igorermolenko"
 estimate: "XS"
 origin: "review _review/review-2026-11-07-r4.md Q3, Q4 / F-24"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -30,9 +30,9 @@ Review Q3: `openapi.yaml:86` says `shared.malformed_request` means only "the bod
 
 ## Checklist
 
-- [ ] `openapi.yaml:86` lists all four triggers; `api-sync-report.md` records the hand edit.
-- [ ] `sad.md:561`: strike the row through, mark it "Resolved 2026-11-07 (6e6d643)" as the row at `:555` is, and bump `updated_at`.
+- [x] `openapi.yaml:86` lists all four triggers; `api-sync-report.md` records the hand edit.
+- [x] `sad.md:561`: strike the row through, mark it "Resolved 2026-11-07 (6e6d643)" as the row at `:555` is, and bump `updated_at`.
 
 ## Definition of Done
 
-- [ ] No doc contradicts the code on these points.
+- [x] No doc contradicts the code on these points.

@@ -2,14 +2,14 @@
 status: Draft
 owner: "igorermolenko"
 reviewers: ["Tech Lead"]
-updated_at: "2026-11-03"
+updated_at: "2026-11-07"
 feature_size: "M"
 ---
 
 # Data model — url-shortener
 
 > **Inputs:** [spec.md](spec.md) §5, [sad.md](sad.md) §5/§6/§8, feature ADR-0002/0004, repo [ADR-0003](../../adr/0003-store-links-in-postgres-on-neon-via-spring-data-jdbc-and-flyway.md).
-> **Staged migrations:** [`migrations/01_create_short_link.up.sql`](migrations/01_create_short_link.up.sql) (+ `.down.sql`). These are not yet in `src/main/resources/db/migration/`; `implement` promotes them.
+> **Staged migrations:** [`migrations/01_create_short_link.up.sql`](migrations/01_create_short_link.up.sql) (+ `.down.sql`). Promoted by `implement` (task T1) as the live [`V2__create_short_link.sql`](../../../src/main/resources/db/migration/V2__create_short_link.sql), which is now canonical; the staged pair is the frozen design record.
 
 ## Aggregates
 

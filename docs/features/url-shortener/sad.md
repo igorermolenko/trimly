@@ -2,7 +2,7 @@
 status: Draft
 owner: "igorermolenko"
 reviewers: ["Tech Lead", "Security Lead"]
-updated_at: "2026-11-02"
+updated_at: "2026-11-07"
 feature_size: "M"
 target_surfaces: [backend-service]  # filled in §4 — subset of: backend-service | web-frontend | mobile-app | desktop-app | cli | worker | library-sdk. Read (never re-derived) by api/sequences/tasks/plan-tests/review → _shared/surfaces.md
 ---
@@ -43,7 +43,7 @@ The order settles conflicts. A choice that speeds up redirects (goal 2) at the c
 <!-- Decision overrides (¶4) — populated by the critic resolution loop, empty otherwise. -->
 
 **Decision overrides.**
-- Decision override: uptime probe every 15 min instead of every 5 min (spec §6 availability measurement). Rationale: a 5-minute probe keeps Neon compute permanently awake (≈ 182 CU-hours against the 100 CU-hour Free allowance), which would suspend link storage around day 17 of every month. See [ADR-0006](adr/0006-let-link-storage-scale-to-zero-with-a-draining-pool-db-free-health-checks-and-a-15-minute-probe.md). Spec sync is tracked in §11.
+- Decision override: uptime probe every 15 min instead of every 5 min (spec §6 availability measurement). Rationale: a 5-minute probe keeps Neon compute permanently awake (≈ 182 CU-hours against the 100 CU-hour Free allowance), which would suspend link storage around day 17 of every month. See [ADR-0006](adr/0006-let-link-storage-scale-to-zero-with-a-draining-pool-db-free-health-checks-and-a-15-minute-probe.md). Spec §6 was synced to 15 min on 2026-11-07 (§11).
 
 ## 2. Constraints
 
@@ -99,7 +99,7 @@ trimly is a single service with two faces. The owner manages short links through
 | visitor | Person | Opens a short link over HTTPS with no credential. Gets a redirect, "link not found" or "temporarily unavailable" |
 | Link storage (Neon PostgreSQL 17) | System (external, managed) | Stores short links. trimly reads and writes it over JDBC/TLS. It can be suspended after idle, which costs a wake-up, or unavailable |
 | Target website | System (external, not contacted) | Where the visitor's browser goes after the redirect. trimly never calls it |
-| Uptime probe | System (external) | Opens a known active short link every 15 min ([ADR-0006](adr/0006-let-link-storage-scale-to-zero-with-a-draining-pool-db-free-health-checks-and-a-15-minute-probe.md); the spec says 5 min — see §1 Decision overrides) and expects the redirect within 5 s. This measures the 99.5 % availability target (spec §6) |
+| Uptime probe | System (external) | Opens a known active short link every 15 min ([ADR-0006](adr/0006-let-link-storage-scale-to-zero-with-a-draining-pool-db-free-health-checks-and-a-15-minute-probe.md); spec §6 says the same since 2026-11-07) and expects the redirect within 5 s. This measures the 99.5 % availability target (spec §6) |
 
 **Trust boundary.** Every inbound request is untrusted until checked. Owner operations need the owner credential. A redirect request is checked only for the shape of its short code. External: no identity provider (deliberate — the owner credential is a single secret held in an env var).
 
@@ -552,7 +552,7 @@ Each top-3 goal from §1 expanded into a full scenario:
 | Risk / debt | Severity | Mitigation | Owner |
 |---|---|---|---|
 | The Neon Free CU-hour allowance runs out (a flood of well-formed random codes, or real traffic growth). Link storage is then suspended until the next month, which breaks the 99.5 % target | High | The scale-to-zero policy in [ADR-0006](adr/0006-let-link-storage-scale-to-zero-with-a-draining-pool-db-free-health-checks-and-a-15-minute-probe.md). Weekly CU-hour check in the Neon console during the first month, then monthly (§7). On a flood, block the source at the Fly.io edge and revisit visitor rate limiting (§8) | igorermolenko |
-| Spec §6 still measures availability with a probe "every 5 min", which contradicts this SAD's 15-minute probe (§1 Decision override) | Medium | Update spec §6's availability measurement to 15 min before `plan-tests` runs, so the test plan and the spec agree | igorermolenko |
+| ~~Spec §6 still measures availability with a probe "every 5 min", which contradicts this SAD's 15-minute probe (§1 Decision override)~~ **Resolved 2026-11-07:** spec §6 now says 15 min (task T31) | Medium | Done: spec §6's availability measurement says 15 min, matching ADR-0006 | igorermolenko |
 | The after-idle latency targets (redirect ≤ 1 s, owner ≤ 1.5 s) rest on Neon's wake-up claim and have not been measured | Medium | Measure after roadmap step 3 with the post-deploy idle check (§10 QG-2b). This is the open question already in spec §8, due after step 3 | igorermolenko |
 | The 2 s timeout split is wrong: too tight turns a Neon wake-up into "temporarily unavailable", too loose lets an outage answer take > 2 s | Medium | Integration test with a paused Postgres container (§10 QG-1a) plus the post-deploy idle check. The split is tuned in `tasks` ([ADR-0003](adr/0003-bound-every-link-storage-call-within-2-seconds-using-pool-and-driver-timeouts.md)) | igorermolenko |
 | Spring Boot + Spring Security + Actuator may not fit the 512 MB machine (roadmap D3) | Medium | Measure heap and RSS during the pre-deploy load test (§10 QG-2a) and tune JVM memory flags. A bigger machine needs a budget decision | igorermolenko |

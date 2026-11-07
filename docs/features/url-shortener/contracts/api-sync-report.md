@@ -72,11 +72,11 @@ Disable and re-enable are two endpoints, not one `PUT …/state`, because sad.md
 
 | # | Kind | Finding | Resolution |
 |---|---|---|---|
-| F1 | sequence gap (supporting) | A request body that is not a JSON object (or has a wrong content type) has no §6 branch and no AC. The contract answers it with 400 `shared.malformed_request`. A missing or empty `targetUrl` is folded into AC-03 (`link.target_url_unsupported`). | **Save as Open Question.** Owner: `specify` (igorermolenko), due before the contract is finalized. Question: should spec §5 add an AC for a malformed create body, or is the framework-level 400 enough? Default for now: 400 `shared.malformed_request`, which requires `ProblemDetailsAdvice` to override `handleHttpMessageNotReadable` / `handleHttpMediaTypeNotSupported` and set the code. |
+| F1 | sequence gap (supporting) | A request body that is not a JSON object (or has a wrong content type) has no §6 branch and no AC. The contract answers it with 400 `shared.malformed_request`. A missing or empty `targetUrl` is folded into AC-03 (`link.target_url_unsupported`). | **Resolved (review 2026-11-07 r3).** The framework-level 400 is enough; no new AC. A body that is not a JSON object, has a wrong content type, or carries an unknown member (`ShortLinkCreate` is `additionalProperties: false`) gets 400 `shared.malformed_request`. Recorded in spec §8. |
 | F2 | deviation by repo convention | The error body is RFC 9457 Problem Details plus a `code` extension member, not the plugin's `{code, message, details?}` envelope. `message` is carried by `detail`. | **Accepted.** CLAUDE.md §Errors, architecture-map.md §Error handling, sad.md §8, ADR-0001. |
 | F3 | deviation by ADR | The list pages forward only: there is no `before` and no `hasPrev`. JSON members are camelCase (the Spring/Jackson default, consistent with `ProblemDetail`). | **Accepted.** ADR-0004 (keyset `id < :cursor` only); AC-09 asks only to "continue right after its last link". |
 
-There are 1 open flag and 2 accepted deviations. No core point fails, so the run does not pause.
+There are no open flags: F1 is resolved and 2 deviations are accepted. No core point fails, so the run does not pause.
 
 ### Implementation notes for `tasks` (not drift)
 

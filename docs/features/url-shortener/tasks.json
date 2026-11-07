@@ -719,7 +719,7 @@
         "docs/features/url-shortener/contracts/api-sync-report.md"
       ],
       "file": "docs/features/url-shortener/tasks/docs-sync-sad-data-model-f1.md",
-      "status": "todo"
+      "status": "done"
     }
   ]
 }

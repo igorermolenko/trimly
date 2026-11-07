@@ -529,6 +529,114 @@
       ],
       "file": "docs/features/url-shortener/tasks/contract-response-validation.md",
       "status": "done"
+    },
+    {
+      "id": "T26",
+      "title": "Prove a storage wake within 2 s still gives the visitor a normal redirect",
+      "layer": "tests",
+      "deps": [],
+      "acs": [
+        "AC-17"
+      ],
+      "dod": "StorageOutageIT green including the slow-wake redirect case, and red with `connection-timeout: 950`; verify + spotless green.",
+      "files_hint": [
+        "src/test/java/io/github/igorermolenko/trimly/StorageOutageIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/slow-wake-redirect-it.md",
+      "status": "todo"
+    },
+    {
+      "id": "T27",
+      "title": "Answer firewall-rejected owner-API addresses with Problem Details shared.malformed_request",
+      "layer": "ports",
+      "deps": [],
+      "acs": [],
+      "dod": "Firewall-rejected `/api/**` requests validate against `Problem`; visitor firewall paths unchanged; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/redirect/api/VisitorRequestRejectedHandler.java",
+        "src/main/java/io/github/igorermolenko/trimly/shared/ProblemDetailsAdvice.java",
+        "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/api/OwnerApiContractIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/owner-api-firewall-problem.md",
+      "status": "todo"
+    },
+    {
+      "id": "T28",
+      "title": "Answer GET / with the plain-text \"Link not found.\"",
+      "layer": "ports",
+      "deps": [
+        "T27"
+      ],
+      "acs": [
+        "AC-16b"
+      ],
+      "dod": "RedirectIT green including `/`; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/redirect/api/RedirectController.java",
+        "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/root-path-not-found.md",
+      "status": "todo"
+    },
+    {
+      "id": "T29",
+      "title": "Pin that production short codes come from SecureRandom",
+      "layer": "app",
+      "deps": [],
+      "acs": [
+        "AC-01"
+      ],
+      "dod": "LinkConfigurationTest green, and red if the source is `java.util.Random`; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/app/LinkConfiguration.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/LinkConfigurationTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/secure-random-source.md",
+      "status": "todo"
+    },
+    {
+      "id": "T30",
+      "title": "Pin that the owner credential never reaches the logs",
+      "layer": "tests",
+      "deps": [],
+      "acs": [
+        "AC-18"
+      ],
+      "dod": "OwnerAuthDenialIT green, and red with the credential logged; verify + spotless green.",
+      "files_hint": [
+        "src/test/java/io/github/igorermolenko/trimly/OwnerAuthDenialIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/credential-never-logged.md",
+      "status": "todo"
+    },
+    {
+      "id": "T31",
+      "title": "Sync spec.md with ADR-0006 and sad.md §8 (15-minute probe, closed open questions)",
+      "layer": "docs",
+      "deps": [],
+      "acs": [],
+      "dod": "spec.md consistent with sad.md §8 and ADR-0006; no AC text changed.",
+      "files_hint": [
+        "docs/features/url-shortener/spec.md"
+      ],
+      "file": "docs/features/url-shortener/tasks/spec-sync-probe-and-open-questions.md",
+      "status": "todo"
+    },
+    {
+      "id": "T32",
+      "title": "Record the shared.* Problem codes in api-sync-report.md",
+      "layer": "docs",
+      "deps": [
+        "T27"
+      ],
+      "acs": [],
+      "dod": "api-sync-report.md matches openapi.yaml.",
+      "files_hint": [
+        "docs/features/url-shortener/contracts/api-sync-report.md"
+      ],
+      "file": "docs/features/url-shortener/tasks/api-sync-report-codes.md",
+      "status": "todo"
     }
   ]
 }

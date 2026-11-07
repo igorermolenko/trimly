@@ -39,6 +39,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 class StorageTimeBudgetIT {
 
   private static final Duration BUDGET = Duration.ofSeconds(2);
+  private static final Duration WAKE = Duration.ofMillis(1100);
 
   @Autowired ShortLinkStore store;
   @Autowired PostgreSQLContainer postgres;
@@ -49,7 +50,7 @@ class StorageTimeBudgetIT {
   private boolean paused;
 
   @AfterEach
-  void unpause() {
+  synchronized void unpause() {
     if (paused) {
       docker().unpauseContainerCmd(postgres.getContainerId()).exec();
       paused = false;
@@ -84,6 +85,36 @@ class StorageTimeBudgetIT {
   }
 
   @Test
+  void aWakeThatAnswersWithinTwoSecondsIsServedNormally() throws Exception {
+    store.insert(aShortLink().build());
+    emptyThePool();
+    pause();
+    // Like a scaled-to-zero Neon: the new connection's login stalls until storage wakes up.
+    Thread waker =
+        Thread.ofVirtual()
+            .start(() -> {
+              sleepQuietly(WAKE);
+              unpause();
+            });
+
+    long start = System.nanoTime();
+    Throwable failure = catchThrowable(() -> assertThat(store.page(null, 20)).isNotEmpty());
+    Duration took = Duration.ofNanos(System.nanoTime() - start);
+    waker.join();
+
+    assertThat(failure).as("a wake of %s within the 2 s budget", WAKE).isNull();
+    assertThat(took).isLessThanOrEqualTo(BUDGET);
+  }
+
+  @Test
+  void pooledConnectionsBoundEachStatementToTheStatementShare() throws Exception {
+    try (var connection = dataSource.getConnection()) {
+      assertThat(connection.getNetworkTimeout()).isEqualTo(600);
+    }
+    assertThat(dataSource.getConnectionTimeout()).isEqualTo(1400);
+  }
+
+  @Test
   void theIdlePoolDrains() {
     assertThat(dataSource.getMinimumIdle()).isZero();
     assertThat(dataSource.getIdleTimeout()).isLessThanOrEqualTo(Duration.ofSeconds(10).toMillis());
@@ -106,9 +137,27 @@ class StorageTimeBudgetIT {
     assertThat(response.body()).contains("\"UP\"").doesNotContain("\"db\"");
   }
 
-  private void pause() {
+  private synchronized void pause() {
     docker().pauseContainerCmd(postgres.getContainerId()).exec();
     paused = true;
+  }
+
+  private void emptyThePool() throws InterruptedException {
+    dataSource.getHikariPoolMXBean().softEvictConnections();
+    long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+    while (dataSource.getHikariPoolMXBean().getTotalConnections() > 0
+        && System.nanoTime() < deadline) {
+      Thread.sleep(10);
+    }
+    assertThat(dataSource.getHikariPoolMXBean().getTotalConnections()).isZero();
+  }
+
+  private static void sleepQuietly(Duration duration) {
+    try {
+      Thread.sleep(duration);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 
   private static com.github.dockerjava.api.DockerClient docker() {

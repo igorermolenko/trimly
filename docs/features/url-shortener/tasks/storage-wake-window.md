@@ -9,8 +9,8 @@ files_hint: ["src/main/resources/application.yml", "src/main/java/io/github/igor
 owner: "igorermolenko"
 estimate: "M"
 origin: "review _review/review-2026-11-07.md R1 / F-1"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the

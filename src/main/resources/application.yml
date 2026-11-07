@@ -5,23 +5,27 @@ spring:
   application:
     name: trimly
   # Every link-storage call answers within 2 s (ADR-0003). The budget is the sum of these bounds:
-  #   acquire a connection (incl. validating a pooled one, or connecting/waking Neon) <= 950 ms
-  #   + the statement on it: server statement_timeout 900 ms, and a client socketTimeout of 1 s
-  #     that also bounds a server that does not answer at all (the driver only takes whole seconds)
-  #   = at most ~1.95 s before a DataAccessException that link.app reports as "unavailable".
+  #   acquire a connection (incl. validating a pooled one, or connecting/waking Neon) <= 1400 ms
+  #   + the statement on it: server statement_timeout 500 ms, and a 600 ms client network timeout
+  #     (trimly.storage.statement-network-timeout) that also bounds a server that stops answering
+  #   = at most ~2.0 s before a DataAccessException that link.app reports as "unavailable".
+  # The driver timeouts are whole seconds and also apply to the login, where a Neon wake happens,
+  # so they stay at 2 s: a wake up to 1.4 s is served on the same request, and a slower one still
+  # lands its connection in the pool for the next request. StorageConnectionConfiguration lowers
+  # each connection's network timeout to the statement share once the login is done.
   # The pool drains when idle (minimum-idle 0, idle-timeout at Hikari's 10 s floor), so Neon can
   # scale to zero; the first request after idle opens a fresh connection inside the same budget.
   datasource:
     hikari:
       minimum-idle: 0
       idle-timeout: 10000
-      connection-timeout: 950
+      connection-timeout: 1400
       validation-timeout: 250
-      connection-init-sql: SET statement_timeout = 900
+      connection-init-sql: SET statement_timeout = 500
       data-source-properties:
-        connectTimeout: 1
-        loginTimeout: 1
-        socketTimeout: 1
+        connectTimeout: 2
+        loginTimeout: 2
+        socketTimeout: 2
   flyway:
     locations: classpath:db/migration
   mvc:
@@ -30,6 +34,8 @@ spring:
 
 # Local defaults; production sets TRIMLY_PUBLIC_BASE_URL and TRIMLY_OWN_HOSTS (domain: roadmap D2).
 trimly:
+  storage:
+    statement-network-timeout: 600ms
   public-base-url: http://localhost:8080
   own-hosts:
     - localhost

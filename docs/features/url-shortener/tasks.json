@@ -381,7 +381,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/infra/StorageTimeBudgetIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/storage-wake-window.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T18",

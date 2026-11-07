@@ -24,7 +24,7 @@
 | T14 | [Expose GET /api/v1/links and POST …/{shortCode}/disable|enable](./list-disable-enable-endpoints.md) | ports | igorermolenko | M | T8, T9, T13 | done | COMMIT |
 | T15 | [Serve GET /{shortCode}: non-reusable 302, plain-text 404/503, query ignored](./redirect-endpoint.md) | ports | igorermolenko | M | T10, T12 | done | COMMIT |
 | T16 | [Add end-to-end ITs: link lifecycle, storage outage within 2 s, and auth denial parity](./cross-cutting-integration-tests.md) | tests | igorermolenko | M | T6, T14, T15 | done | COMMIT |
-| T17 | [Re-split the storage budget so a wake within 2 s is answered normally](./storage-wake-window.md) | wiring | igorermolenko | M | — | todo | — |
+| T17 | [Re-split the storage budget so a wake within 2 s is answered normally](./storage-wake-window.md) | wiring | igorermolenko | M | — | done | COMMIT |
 | T18 | [Run Flyway migrations on their own connection, outside the request budget](./flyway-own-connection.md) | wiring | igorermolenko | S | T17 | todo | — |
 | T19 | [Count the public base URL host as an own host; no localhost defaults in production config](./public-host-is-own-host.md) | app | igorermolenko | S | T18 | todo | — |
 | T20 | [Expose the liveness-only health group ADR-0006 decides](./liveness-health-group.md) | wiring | igorermolenko | S | T19 | todo | — |

@@ -91,7 +91,7 @@ class RedirectIT {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"/abc2345.", "/toolongcode", "/abc0345", "/abc2345/extra", "/a/b/c"})
+  @ValueSource(strings = {"/", "/abc2345.", "/toolongcode", "/abc0345", "/abc2345/extra", "/a/b/c"})
   void aMalformedAddressIsNotFoundWithoutAStorageLookup(String path) throws Exception {
     clearInvocations(store);
 

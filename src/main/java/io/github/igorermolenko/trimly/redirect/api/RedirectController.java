@@ -34,6 +34,12 @@ class RedirectController {
     return answer(followShortLink.follow(segment));
   }
 
+  /** The bare root is a code of the wrong length (empty): "link not found" without a lookup. */
+  @GetMapping("/")
+  ResponseEntity<String> root() {
+    return answer(VisitorAnswer.Message.NOT_FOUND);
+  }
+
   /** More than one segment can never be a short code: "link not found" without a lookup. */
   @GetMapping("/{first}/{second}/{*rest}")
   ResponseEntity<String> tooManySegments(@PathVariable String first) {

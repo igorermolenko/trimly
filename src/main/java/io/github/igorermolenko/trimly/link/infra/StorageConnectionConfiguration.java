@@ -8,6 +8,7 @@ import java.time.Duration;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.flyway.autoconfigure.FlywayConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -51,6 +52,18 @@ class StorageConnectionConfiguration {
         return bean;
       }
     };
+  }
+
+  /**
+   * Migrations are not link-storage calls: they run on their own driver connection to the same
+   * database, without the request budget's statement or network timeouts, so a long migration, a
+   * wait for another instance's migration lock or a slow wake never stops trimly from starting.
+   */
+  @Bean
+  FlywayConfigurationCustomizer migrationsOutsideTheRequestBudget(HikariDataSource storage) {
+    return configuration ->
+        configuration.dataSource(
+            storage.getJdbcUrl(), storage.getUsername(), storage.getPassword());
   }
 
   /** Lowers the network timeout of every connection it opens, once the login is done. */

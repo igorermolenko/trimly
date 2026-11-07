@@ -397,7 +397,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/infra/StorageTimeBudgetIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/flyway-own-connection.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T19",

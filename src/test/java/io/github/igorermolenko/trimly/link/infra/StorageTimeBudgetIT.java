@@ -15,6 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -25,6 +26,7 @@ import org.springframework.boot.test.web.server.LocalManagementPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
@@ -44,6 +46,7 @@ class StorageTimeBudgetIT {
   @Autowired ShortLinkStore store;
   @Autowired PostgreSQLContainer postgres;
   @Autowired HikariDataSource dataSource;
+  @Autowired Flyway flyway;
 
   @LocalManagementPort int managementPort;
 
@@ -112,6 +115,14 @@ class StorageTimeBudgetIT {
       assertThat(connection.getNetworkTimeout()).isEqualTo(600);
     }
     assertThat(dataSource.getConnectionTimeout()).isEqualTo(1400);
+  }
+
+  @Test
+  void migrationsRunOutsideTheRequestBudget() {
+    var migrations = new JdbcTemplate(flyway.getConfiguration().getDataSource());
+
+    assertThat(migrations.queryForObject("SHOW statement_timeout", String.class)).isEqualTo("0");
+    assertThat(migrations.queryForObject("SELECT 1 FROM pg_sleep(1.2)", Integer.class)).isOne();
   }
 
   @Test

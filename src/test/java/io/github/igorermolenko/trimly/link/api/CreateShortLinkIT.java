@@ -106,6 +106,7 @@ class CreateShortLinkIT {
         .andExpect(jsonPath("$.code").value("link.target_url_too_long"))
         .andExpect(
             jsonPath("$.detail").value("The target URL must be at most 2048 characters long."));
+    assertThat(storedLinks()).isZero();
   }
 
   @Test

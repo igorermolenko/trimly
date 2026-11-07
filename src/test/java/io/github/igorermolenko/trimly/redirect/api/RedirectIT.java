@@ -61,6 +61,23 @@ class RedirectIT {
     assertThat(response.body()).isEmpty();
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"Bearer wrong-credential", "Basic b3duZXI6c2VjcmV0"})
+  void aVisitorWithAWrongCredentialIsStillRedirected(String authorization) throws Exception {
+    ShortLink link = stored(aShortLink().withTargetUrl("https://example.test/x").build());
+
+    HttpResponse<String> response =
+        http.send(
+            HttpRequest.newBuilder(
+                    URI.create("http://localhost:" + port + "/" + link.shortCode().value()))
+                .header("Authorization", authorization)
+                .build(),
+            HttpResponse.BodyHandlers.ofString());
+
+    assertThat(response.statusCode()).isEqualTo(302);
+    assertThat(response.headers().allValues("Location")).containsExactly("https://example.test/x");
+  }
+
   @Test
   void aDisabledLinkLooksExactlyLikeAnUnknownCode() throws Exception {
     ShortLink disabled = stored(aShortLink().disabled().build());

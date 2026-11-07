@@ -508,7 +508,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/api/CreateShortLinkIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/test-plan-gaps.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T25",

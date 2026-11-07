@@ -9,8 +9,8 @@ files_hint: ["src/test/java/io/github/igorermolenko/trimly/link/app/CreateShortL
 owner: "igorermolenko"
 estimate: "M"
 origin: "review _review/review-2026-11-07.md R9 (a)-(f) / F-9"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the

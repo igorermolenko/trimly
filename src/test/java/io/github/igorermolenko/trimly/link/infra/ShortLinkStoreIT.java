@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -52,6 +54,27 @@ class ShortLinkStoreIT {
     store.insert(link);
 
     assertThat(store.findByShortCode(ShortCode.of("ABCDEFG"))).isEmpty();
+  }
+
+  @ParameterizedTest
+  @EnumSource(LinkState.class)
+  void aTakenCodeIsRefusedAndTheExistingLinkIsNeverOverwritten(LinkState existingState) {
+    ShortLink existing =
+        aShortLink()
+            .withShortCode("abc2345")
+            .withTargetUrl("https://example.test/original")
+            .build();
+    store.insert(existing);
+    store.setState(existing.shortCode(), existingState, existing.updatedAt());
+    ShortLink before = store.findByShortCode(existing.shortCode()).orElseThrow();
+
+    ShortLink newcomer =
+        aShortLink().withShortCode("abc2345").withTargetUrl("https://example.test/other").build();
+    assertThatThrownBy(() -> store.insert(newcomer)).isInstanceOf(ShortCodeTaken.class);
+
+    assertThat(store.findByShortCode(existing.shortCode())).contains(before);
+    assertThat(before.state()).isEqualTo(existingState);
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM short_link", Integer.class)).isOne();
   }
 
   @Test

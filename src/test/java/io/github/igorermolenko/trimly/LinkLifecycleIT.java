@@ -37,7 +37,7 @@ class LinkLifecycleIT {
 
   @Test
   @DisplayName(
-      "AC-02, AC-08, AC-12, AC-15, AC-20: create, follow, create again, disable, re-enable")
+      "AC-02, AC-08, AC-11, AC-12, AC-15, AC-20: create, follow, create again, disable, re-enable")
   void aLinkKeepsItsCodeAndTargetThroughItsWholeLife() {
     // O creates X -> A; V opens A at once -> redirect to X, not reusable (AC-08).
     String a = create(X);
@@ -55,6 +55,8 @@ class LinkLifecycleIT {
     assertThat(disabled.statusCode()).isEqualTo(404);
     assertThat(disabled.body()).isEqualTo("Link not found.");
     assertRedirectsTo(b, X);
+    // The owner's list shows A disabled and B active (AC-11).
+    assertThat(listedStates()).containsEntry(a, "DISABLED").containsEntry(b, "ACTIVE");
 
     // O re-enables A; V opens A -> the same X under the same code (AC-15, AC-20).
     assertThat(client.owner("POST", "/api/v1/links/" + a + "/enable", null).statusCode())
@@ -69,6 +71,15 @@ class LinkLifecycleIT {
         .extracting(item -> (Object) item.get("shortCode"))
         .containsExactly((Object) b, a);
     assertThat(items).allSatisfy(item -> assertThat(item.get("targetUrl")).isEqualTo(X));
+  }
+
+  private Map<Object, Object> listedStates() {
+    @SuppressWarnings("unchecked")
+    List<Map<String, Object>> items =
+        (List<Map<String, Object>>) json(client.owner("GET", "/api/v1/links", null)).get("items");
+    Map<Object, Object> states = new java.util.HashMap<>();
+    items.forEach(item -> states.put(item.get("shortCode"), item.get("state")));
+    return states;
   }
 
   private String create(String target) {

@@ -9,8 +9,8 @@ files_hint: ["docs/features/url-shortener/spec.md"]
 owner: "igorermolenko"
 estimate: "XS"
 origin: "review _review/review-2026-11-07-r2.md N6 / F-15"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the

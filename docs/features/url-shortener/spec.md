@@ -2,7 +2,7 @@
 status: Draft
 owner: "igorermolenko"
 reviewers: ["Tech Lead", "Security Lead"]
-updated_at: "2026-11-02"
+updated_at: "2026-11-07"
 feature_size: "M"
 ---
 
@@ -234,7 +234,7 @@ Traceability:
 | Redirect latency p95, first request after the link storage has idled (≥ 5 min without requests) | ≤ 1 s server-side | same metric, filtered to the first request after an idle gap |
 | Owner operations latency p95 (create, list, disable, re-enable) | ≤ 300 ms with link storage awake; ≤ 1.5 s for the first request after idle | server-side request-duration metric per operation |
 | Throughput | ≥ 50 redirects/s sustained on one production-size instance, link storage awake | load test run before the deploy step (roadmap step 3) |
-| Availability of redirects | 99.5 % per calendar month (≈ 3.6 h downtime allowed) | external uptime probe every 5 min against a known active short link; a probe fails unless it is redirected to the expected target URL within 5 s ("temporarily unavailable", "link not found" or no answer all count as down) |
+| Availability of redirects | 99.5 % per calendar month (≈ 3.6 h downtime allowed) | external uptime probe every 15 min ([ADR-0006](adr/0006-let-link-storage-scale-to-zero-with-a-draining-pool-db-free-health-checks-and-a-15-minute-probe.md); 5 min would keep link storage awake and exhaust its free compute) against a known active short link; a probe fails unless it is redirected to the expected target URL within 5 s ("temporarily unavailable", "link not found" or no answer all count as down) |
 | Disable propagation | 0 s: the first visit after a disable is confirmed already gets "link not found", including for visitors whose browser opened the link before | integration test for AC-12 (asserts the redirect is marked as not reusable without asking trimly) |
 | Storage-unavailable answer time | ≤ 2 s from request to "temporarily unavailable" (visitor and owner) | integration test for AC-17 / AC-17b with link storage stopped |
 | Running cost | ≤ $5 per month for everything needed to serve trimly | monthly hosting and database bills |
@@ -261,6 +261,6 @@ Traceability:
 
 ## 8. Open questions
 
-- [ ] Should trimly limit how many redirect lookups one visitor can make per minute, to protect the link storage's free compute budget from code-guessing floods? Default now: no rate limit; AC-16b is the only guard. — owner: igorermolenko, due: before `sdd:design`
-- [ ] Will the 5-minute uptime probe (§6 availability) keep the link storage from ever idling, so it uses up the free compute budget and makes the after-idle latency rows moot? Default now: probe every 5 min against a known active short link. — owner: igorermolenko, due: before `sdd:design`
+- [x] Should trimly limit how many redirect lookups one visitor can make per minute, to protect the link storage's free compute budget from code-guessing floods? Default now: no rate limit; AC-16b is the only guard. — owner: igorermolenko, due: before `sdd:design` — **Resolved (design):** no visitor rate limit in v1; AC-16b keeps malformed addresses away from storage, and a flood of well-formed codes is an accepted risk watched through compute usage ([sad.md §8](sad.md)).
+- [x] Will the 5-minute uptime probe (§6 availability) keep the link storage from ever idling, so it uses up the free compute budget and makes the after-idle latency rows moot? Default now: probe every 5 min against a known active short link. — owner: igorermolenko, due: before `sdd:design` — **Resolved (design):** yes, a 5-minute probe would keep storage awake permanently; the probe runs every 15 min instead ([ADR-0006](adr/0006-let-link-storage-scale-to-zero-with-a-draining-pool-db-free-health-checks-and-a-15-minute-probe.md), [sad.md §8](sad.md)); §6 updated.
 - [ ] Are the after-idle latency targets (redirect ≤ 1 s, owner operations ≤ 1.5 s) achievable? They rest on the storage vendor's "a few hundred milliseconds" wake-up claim and have not been measured. Default now: keep both targets as written. — owner: igorermolenko, due: after roadmap step 3 (first deploy)

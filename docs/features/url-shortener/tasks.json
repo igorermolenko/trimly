@@ -621,7 +621,7 @@
         "docs/features/url-shortener/spec.md"
       ],
       "file": "docs/features/url-shortener/tasks/spec-sync-probe-and-open-questions.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T32",

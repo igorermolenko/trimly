@@ -38,7 +38,7 @@
 | T28 | [Answer GET / with the plain-text "Link not found."](./root-path-not-found.md) | ports | igorermolenko | S | T27 | done | COMMIT |
 | T29 | [Pin that production short codes come from SecureRandom](./secure-random-source.md) | app | igorermolenko | S | — | done | COMMIT |
 | T30 | [Pin that the owner credential never reaches the logs](./credential-never-logged.md) | tests | igorermolenko | S | — | done | COMMIT |
-| T31 | [Sync spec.md with ADR-0006 and sad.md §8 (15-minute probe, closed open questions)](./spec-sync-probe-and-open-questions.md) | docs | igorermolenko | XS | — | todo | — |
+| T31 | [Sync spec.md with ADR-0006 and sad.md §8 (15-minute probe, closed open questions)](./spec-sync-probe-and-open-questions.md) | docs | igorermolenko | XS | — | done | COMMIT |
 | T32 | [Record the shared.* Problem codes in api-sync-report.md](./api-sync-report-codes.md) | docs | igorermolenko | XS | T27 | todo | — |
 
 **Total:** 32 tasks — 16 planned (~12.5 person-days) + 9 review follow-ups T17–T25 from `_review/review-2026-11-07.md` + 7 review follow-ups T26–T32 from `_review/review-2026-11-07-r2.md`.

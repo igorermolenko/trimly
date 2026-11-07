@@ -40,7 +40,7 @@
 | T30 | [Pin that the owner credential never reaches the logs](./credential-never-logged.md) | tests | igorermolenko | S | — | done | COMMIT |
 | T31 | [Sync spec.md with ADR-0006 and sad.md §8 (15-minute probe, closed open questions)](./spec-sync-probe-and-open-questions.md) | docs | igorermolenko | XS | — | done | COMMIT |
 | T32 | [Record the shared.* Problem codes in api-sync-report.md](./api-sync-report-codes.md) | docs | igorermolenko | XS | T27 | done | COMMIT |
-| T33 | [Answer a direct GET /error with the plain-text "Link not found."](./error-path-not-found.md) | ports | igorermolenko | S | — | todo | — |
+| T33 | [Answer a direct GET /error with the plain-text "Link not found."](./error-path-not-found.md) | ports | igorermolenko | S | — | done | COMMIT |
 | T34 | [Answer GET /api and /api/ for the owner with a Problem Details 404](./api-root-problem.md) | ports | igorermolenko | XS | T33 | todo | — |
 | T35 | [Reject unknown members in a create request as shared.malformed_request](./reject-unknown-create-members.md) | ports | igorermolenko | S | T34 | todo | — |
 | T36 | [Give firewall-rejected owner-API answers the owner-API cache and nosniff headers](./firewall-problem-owner-headers.md) | ports | igorermolenko | XS | T33 | todo | — |

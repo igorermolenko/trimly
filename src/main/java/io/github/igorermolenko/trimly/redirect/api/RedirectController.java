@@ -50,7 +50,7 @@ class RedirectController {
     return answer(VisitorAnswer.Message.NOT_FOUND);
   }
 
-  private static ResponseEntity<String> answer(VisitorAnswer answer) {
+  static ResponseEntity<String> answer(VisitorAnswer answer) {
     return switch (answer) {
       case VisitorAnswer.Redirect redirect ->
           ResponseEntity.status(HttpStatus.FOUND)

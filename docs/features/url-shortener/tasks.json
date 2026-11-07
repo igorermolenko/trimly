@@ -481,7 +481,7 @@
         "src/test/java/io/github/igorermolenko/trimly/shared/ProblemDetailsAdviceIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/problem-codes-everywhere.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T24",

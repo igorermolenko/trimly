@@ -30,7 +30,7 @@
 | T20 | [Expose the liveness-only health group ADR-0006 decides](./liveness-health-group.md) | wiring | igorermolenko | S | T19 | done | COMMIT |
 | T21 | [Answer firewall-rejected visitor paths with the plain-text "Link not found."](./firewall-rejected-visitor-paths.md) | ports | igorermolenko | S | — | done | COMMIT |
 | T22 | [Keep Spring Security's no-cache headers on the owner API](./owner-api-cache-headers.md) | ports | igorermolenko | S | T21 | done | COMMIT |
-| T23 | [Give every owner-API Problem a code; a wrong Content-Type is shared.malformed_request](./problem-codes-everywhere.md) | ports | igorermolenko | M | — | todo | — |
+| T23 | [Give every owner-API Problem a code; a wrong Content-Type is shared.malformed_request](./problem-codes-everywhere.md) | ports | igorermolenko | M | — | done | COMMIT |
 | T24 | [Write the missing test-plan tests for AC-20b, AC-20, AC-19, AC-18, AC-11 and AC-04](./test-plan-gaps.md) | tests | igorermolenko | M | T23 | todo | — |
 | T25 | [Validate owner-API responses against contracts/openapi.yaml](./contract-response-validation.md) | tests | igorermolenko | S | T23, T24 | todo | — |
 

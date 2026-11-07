@@ -424,6 +424,13 @@ components:
             - link.not_found
             - link.temporarily_unavailable
             - shared.malformed_request
+            # Fallbacks the shared advice sets on framework-level answers that carry no module code
+            # (review 2026-11-07, R5): unknown owner-API address, unsupported method, unacceptable
+            # Accept header, unexpected failure.
+            - shared.not_found
+            - shared.method_not_allowed
+            - shared.not_acceptable
+            - shared.internal_error
           example: link.not_found
 
     ShortCode:

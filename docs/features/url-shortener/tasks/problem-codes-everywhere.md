@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/shared/ProblemDetails
 owner: "igorermolenko"
 estimate: "M"
 origin: "review _review/review-2026-11-07.md R4 + R5 / F-4, F-5"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the

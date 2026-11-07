@@ -637,6 +637,89 @@
       ],
       "file": "docs/features/url-shortener/tasks/api-sync-report-codes.md",
       "status": "done"
+    },
+    {
+      "id": "T33",
+      "title": "Answer a direct GET /error with the plain-text \"Link not found.\"",
+      "layer": "ports",
+      "deps": [],
+      "acs": [
+        "AC-16b"
+      ],
+      "dod": "RedirectIT green including `/error`; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/redirect/api/VisitorErrorController.java",
+        "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/error-path-not-found.md",
+      "status": "todo"
+    },
+    {
+      "id": "T34",
+      "title": "Answer GET /api and /api/ for the owner with a Problem Details 404",
+      "layer": "ports",
+      "deps": [
+        "T33"
+      ],
+      "acs": [],
+      "dod": "OwnerApiContractIT green with `/api` and `/api/` answering a `Problem` 404 `shared.not_found`; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/redirect/api/RedirectController.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/api/OwnerApiContractIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/api-root-problem.md",
+      "status": "todo"
+    },
+    {
+      "id": "T35",
+      "title": "Reject unknown members in a create request as shared.malformed_request",
+      "layer": "ports",
+      "deps": [
+        "T34"
+      ],
+      "acs": [
+        "AC-03"
+      ],
+      "dod": "CreateShortLinkIT and OwnerApiContractIT green with the new cases; verify + spotless green.",
+      "files_hint": [
+        "src/main/resources/application.yml",
+        "src/test/java/io/github/igorermolenko/trimly/link/api/CreateShortLinkIT.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/api/OwnerApiContractIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/reject-unknown-create-members.md",
+      "status": "todo"
+    },
+    {
+      "id": "T36",
+      "title": "Give firewall-rejected owner-API answers the owner-API cache and nosniff headers",
+      "layer": "ports",
+      "deps": [
+        "T33"
+      ],
+      "acs": [],
+      "dod": "RedirectIT green with both headers asserted; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/redirect/api/VisitorRequestRejectedHandler.java",
+        "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/firewall-problem-owner-headers.md",
+      "status": "todo"
+    },
+    {
+      "id": "T37",
+      "title": "Sync sad.md, data-model.md, spec §8 and api-sync-report F1 with what landed",
+      "layer": "docs",
+      "deps": [],
+      "acs": [],
+      "dod": "No doc contradicts the spec, the ADRs or the live code on these points.",
+      "files_hint": [
+        "docs/features/url-shortener/sad.md",
+        "docs/features/url-shortener/data-model.md",
+        "docs/features/url-shortener/spec.md",
+        "docs/features/url-shortener/contracts/api-sync-report.md"
+      ],
+      "file": "docs/features/url-shortener/tasks/docs-sync-sad-data-model-f1.md",
+      "status": "todo"
     }
   ]
 }

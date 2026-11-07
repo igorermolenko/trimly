@@ -82,6 +82,31 @@ class RedirectIT {
     verifyNoInteractions(store);
   }
 
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "/abc2345;",
+        "/abc2345;x=1",
+        "/abc%25345",
+        "/abc%2F2345",
+        "//abc2345",
+        "/abc2345//"
+      })
+  void anAddressTheFirewallRejectsIsStillNotFound(String path) throws Exception {
+    clearInvocations(store);
+
+    assertNotFoundText(get(path));
+    verifyNoInteractions(store);
+  }
+
+  @Test
+  void anOwnerApiAddressTheFirewallRejectsIsNotAVisitorAnswer() throws Exception {
+    HttpResponse<String> response = get("/api/v1/links;x=1");
+
+    assertThat(response.statusCode()).isEqualTo(400);
+    assertThat(response.body()).doesNotContain(NOT_FOUND);
+  }
+
   @Test
   void storageUnavailableIsTheTryAgainLaterSentence() throws Exception {
     doReturn(Resolution.Unavailable.INSTANCE).when(lookup).resolve(any());

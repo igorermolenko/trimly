@@ -112,6 +112,20 @@ class OwnerApiContractIT {
     });
   }
 
+  @Test
+  void theOwnerApiRootIsAProblemNotAVisitorAnswer() {
+    for (String path : List.of("/api", "/api/")) {
+      HttpResponse<String> response = client.owner("GET", path, null);
+
+      assertThat(response.statusCode()).as(path).isEqualTo(404);
+      assertThat(response.headers().firstValue("Content-Type"))
+          .as(path)
+          .hasValueSatisfying(type -> assertThat(type).startsWith("application/problem+json"));
+      assertMatches(response, "Problem");
+      assertThat(HttpTestClient.json(response).get("code")).as(path).isEqualTo("shared.not_found");
+    }
+  }
+
   private HttpResponse<String> create(String targetUrl) {
     return client.owner("POST", "/api/v1/links", "{\"targetUrl\":\"" + targetUrl + "\"}");
   }

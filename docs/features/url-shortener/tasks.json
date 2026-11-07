@@ -668,7 +668,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/api/OwnerApiContractIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/api-root-problem.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T35",

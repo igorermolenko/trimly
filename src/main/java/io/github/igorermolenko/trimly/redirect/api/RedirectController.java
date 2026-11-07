@@ -31,6 +31,7 @@ class RedirectController {
 
   @GetMapping({"/{segment}", "/{segment}/"})
   ResponseEntity<String> follow(@PathVariable String segment) {
+    requireNotOwnerApi(segment);
     return answer(followShortLink.follow(segment));
   }
 
@@ -43,11 +44,15 @@ class RedirectController {
   /** More than one segment can never be a short code: "link not found" without a lookup. */
   @GetMapping("/{first}/{second}/{*rest}")
   ResponseEntity<String> tooManySegments(@PathVariable String first) {
-    if ("api".equals(first)) {
-      // An unknown owner-API path stays a Problem Details 404.
+    requireNotOwnerApi(first);
+    return answer(VisitorAnswer.Message.NOT_FOUND);
+  }
+
+  /** An unknown owner-API path ({@code /api}, {@code /api/…}) stays a Problem Details 404. */
+  private static void requireNotOwnerApi(String firstSegment) {
+    if ("api".equals(firstSegment)) {
       throw new ErrorResponseException(HttpStatus.NOT_FOUND);
     }
-    return answer(VisitorAnswer.Message.NOT_FOUND);
   }
 
   static ResponseEntity<String> answer(VisitorAnswer answer) {

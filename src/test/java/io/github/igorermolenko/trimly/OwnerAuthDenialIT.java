@@ -10,8 +10,11 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,8 +22,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /** A missing and a wrong owner credential are indistinguishable and change nothing (AC-18). */
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(OutputCaptureExtension.class)
 class OwnerAuthDenialIT {
 
+  private static final String WRONG = "not-the-owner-credential";
   private static final String BODY = "{\"targetUrl\":\"https://example.test/denied\"}";
 
   @LocalServerPort int port;
@@ -43,17 +48,9 @@ class OwnerAuthDenialIT {
   @DisplayName("AC-18: missing and wrong credentials get byte-identical denials on all four ops")
   void missingAndWrongCredentialsAreIndistinguishableAndChangeNothing() {
     String rowsBefore = rows();
-    List<String[]> operations =
-        List.of(
-            new String[] {"POST", "/api/v1/links", BODY},
-            new String[] {"GET", "/api/v1/links", null},
-            new String[] {"POST", "/api/v1/links/" + code + "/disable", null},
-            new String[] {"POST", "/api/v1/links/" + code + "/enable", null});
-
-    for (String[] op : operations) {
+    for (String[] op : operations()) {
       HttpResponse<String> missing = client.withAuthorization(op[0], op[1], op[2], null);
-      HttpResponse<String> wrong =
-          client.withAuthorization(op[0], op[1], op[2], "Bearer not-the-owner-credential");
+      HttpResponse<String> wrong = client.withAuthorization(op[0], op[1], op[2], "Bearer " + WRONG);
 
       assertThat(missing.statusCode()).as(op[1]).isEqualTo(401);
       assertThat(wrong.statusCode()).as(op[1]).isEqualTo(401);
@@ -81,6 +78,26 @@ class OwnerAuthDenialIT {
         .isEqualTo(badRequest.headers().firstValue("Content-Type"));
     assertThat(json(denied).keySet()).isEqualTo(json(badRequest).keySet());
     assertThat(json(denied).get("code")).isEqualTo("access.authentication_required");
+  }
+
+  @Test
+  @DisplayName("AC-18 / spec §6.1: neither the owner credential nor a wrong one is ever logged")
+  void noCredentialIsEverWrittenToTheLogs(CapturedOutput output) {
+    for (String[] op : operations()) {
+      client.owner(op[0], op[1], op[2]);
+      client.withAuthorization(op[0], op[1], op[2], "Bearer " + WRONG);
+      client.withAuthorization(op[0], op[1], op[2], null);
+    }
+
+    assertThat(output.getAll()).doesNotContain(credential.ownerCredential()).doesNotContain(WRONG);
+  }
+
+  private List<String[]> operations() {
+    return List.of(
+        new String[] {"POST", "/api/v1/links", BODY},
+        new String[] {"GET", "/api/v1/links", null},
+        new String[] {"POST", "/api/v1/links/" + code + "/disable", null},
+        new String[] {"POST", "/api/v1/links/" + code + "/enable", null});
   }
 
   private String rows() {

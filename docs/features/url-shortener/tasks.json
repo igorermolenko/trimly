@@ -608,7 +608,7 @@
         "src/test/java/io/github/igorermolenko/trimly/OwnerAuthDenialIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/credential-never-logged.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T31",

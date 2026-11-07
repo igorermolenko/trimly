@@ -75,6 +75,21 @@ class OwnerApiSecurityIT {
     assertThat(response.headers().firstValue("Set-Cookie")).isEmpty();
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void ownerApiAnswersAreNeverCached(boolean withCredential) throws Exception {
+    HttpResponse<String> response =
+        send(
+            "GET",
+            "/api/v1/links",
+            withCredential ? "Bearer " + credential.ownerCredential() : null);
+
+    assertThat(response.statusCode()).isEqualTo(withCredential ? 200 : 401);
+    assertThat(response.headers().allValues("Cache-Control"))
+        .singleElement()
+        .satisfies(value -> assertThat(value).contains("no-store"));
+  }
+
   @Test
   void visitorPathsNeedNoCredential() throws Exception {
     HttpResponse<String> response = send("GET", "/aB3dEf9", null);

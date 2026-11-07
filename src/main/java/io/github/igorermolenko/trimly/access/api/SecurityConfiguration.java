@@ -42,9 +42,9 @@ class SecurityConfiguration {
         .formLogin(form -> form.disable())
         .httpBasic(basic -> basic.disable())
         .logout(logout -> logout.disable())
+        // Security's default no-cache headers stay on: they keep owner-API answers out of caches,
+        // and its writer leaves a response that sets its own Cache-Control (redirects) alone.
         .requestCache(cache -> cache.disable())
-        // Redirects set Cache-Control: no-store themselves (AC-07); don't let Security rewrite it.
-        .headers(headers -> headers.cacheControl(cacheControl -> cacheControl.disable()))
         .build();
   }
 

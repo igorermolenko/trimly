@@ -466,7 +466,7 @@
         "src/test/java/io/github/igorermolenko/trimly/access/api/OwnerApiSecurityIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/owner-api-cache-headers.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T23",

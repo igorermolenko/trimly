@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/shared/ProblemDetails
 owner: "igorermolenko"
 estimate: "XS"
 origin: "review _review/review-2026-11-08-r2.md S1 / F-29"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -34,10 +34,10 @@ AC-09 — verbatim text in [spec.md](../spec.md) §5. Contract: `openapi.yaml` l
 
 ## Checklist
 
-- [ ] RED: raw-socket owner-API cases in `ProblemDetailsAdviceIT` (`GET /api/v1/links?after=%zz`, `?limit=%` with the owner credential) assert 400 `application/problem+json`, `code: shared.malformed_request`, the owner-API no-cache and nosniff headers, and no exception text.
-- [ ] Map exactly `InvalidParameterException` (not the broad `IllegalStateException`) to 400 `shared.malformed_request` in `ProblemDetailsAdvice`, without an ERROR log.
-- [ ] `openapi.yaml` list 400: name the trigger (a query parameter that is not validly percent-encoded); add a hand-edit note to `api-sync-report.md`.
+- [x] RED: raw-socket owner-API cases in `ProblemDetailsAdviceIT` (`GET /api/v1/links?after=%zz`, `?limit=%` with the owner credential) assert 400 `application/problem+json`, `code: shared.malformed_request`, the owner-API no-cache and nosniff headers, and no exception text.
+- [x] Map exactly `InvalidParameterException` (not the broad `IllegalStateException`) to 400 `shared.malformed_request` in `ProblemDetailsAdvice`, without an ERROR log.
+- [x] `openapi.yaml` list 400: name the trigger (a query parameter that is not validly percent-encoded); add a hand-edit note to `api-sync-report.md`.
 
 ## Definition of Done
 
-- [ ] ProblemDetailsAdviceIT green with the new cases; verify + spotless green.
+- [x] ProblemDetailsAdviceIT green with the new cases; verify + spotless green.

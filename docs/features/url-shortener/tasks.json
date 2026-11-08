@@ -856,7 +856,7 @@
         "docs/features/url-shortener/contracts/api-sync-report.md"
       ],
       "file": "docs/features/url-shortener/tasks/list-query-bad-percent-escape.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T46",

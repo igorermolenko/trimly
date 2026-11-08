@@ -1,6 +1,7 @@
 package io.github.igorermolenko.trimly.shared;
 
 import java.net.URI;
+import org.apache.tomcat.util.http.InvalidParameterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -55,11 +56,13 @@ class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
   }
 
   /**
-   * An owner-API address Spring Security's firewall rejected (a {@code ;}, an encoded {@code /} or
-   * {@code %}) can never name an operation: {@code code: shared.malformed_request}.
+   * An owner-API address that can never name an operation: {@code code: shared.malformed_request}.
+   * Either Spring Security's firewall rejected it (a {@code ;}, an encoded {@code /} or {@code %}),
+   * or its query is not validly percent-encoded ({@code ?after=%zz}, a lone {@code %}), so Tomcat
+   * throws on every parameter read.
    */
-  @ExceptionHandler(RequestRejectedException.class)
-  ProblemDetail handleRejectedAddress(RequestRejectedException ex) {
+  @ExceptionHandler({RequestRejectedException.class, InvalidParameterException.class})
+  ProblemDetail handleRejectedAddress(Exception ex) {
     ProblemDetail problem =
         ProblemDetail.forStatusAndDetail(
             HttpStatus.BAD_REQUEST, "The request address is not valid.");

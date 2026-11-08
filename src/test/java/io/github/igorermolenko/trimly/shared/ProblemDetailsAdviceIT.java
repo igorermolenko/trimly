@@ -5,10 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.github.igorermolenko.trimly.HttpTestClient;
 import io.github.igorermolenko.trimly.TestcontainersConfiguration;
 import io.github.igorermolenko.trimly.access.app.OwnerCredentialProperties;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,6 +78,27 @@ class ProblemDetailsAdviceIT {
         "shared.not_acceptable");
   }
 
+  // Tomcat cannot decode these queries; every parameter read then throws (review 2026-11-08-r2 S1).
+  // A client sends them as typed, so the request target goes over a raw socket.
+  @ParameterizedTest
+  @ValueSource(strings = {"/api/v1/links?after=%zz", "/api/v1/links?limit=%", "/api/v1/links?a=%2"})
+  void aQueryThatIsNotValidlyPercentEncodedIsAMalformedRequest(String target) throws Exception {
+    String response = rawOwnerGet(target);
+
+    String head = response.substring(0, response.indexOf("\r\n\r\n")).toLowerCase(Locale.ROOT);
+    String body = response.substring(response.indexOf("\r\n\r\n") + 4);
+    assertThat(head)
+        .startsWith("http/1.1 400 ")
+        .contains("\r\ncontent-type: application/problem+json")
+        .contains("\r\ncache-control: no-cache, no-store, max-age=0, must-revalidate\r\n")
+        .contains("\r\nx-content-type-options: nosniff\r\n");
+    assertThat(body)
+        .contains("\"code\":\"shared.malformed_request\"")
+        .contains("\"status\":400")
+        .doesNotContain("Exception")
+        .doesNotContain("shared.internal_error");
+  }
+
   private void assertProblem(HttpResponse<String> response, int status, String code) {
     assertThat(response.statusCode()).isEqualTo(status);
     assertThat(response.headers().firstValue("Content-Type"))
@@ -89,5 +115,23 @@ class ProblemDetailsAdviceIT {
 
   private HttpResponse<String> send(HttpRequest.Builder request) throws Exception {
     return http.send(request.build(), HttpResponse.BodyHandlers.ofString());
+  }
+
+  /** Sends the request target byte for byte as the owner; the whole response as text. */
+  private String rawOwnerGet(String target) throws Exception {
+    try (Socket socket = new Socket("localhost", port)) {
+      OutputStream out = socket.getOutputStream();
+      out.write(
+          ("GET "
+                  + target
+                  + " HTTP/1.1\r\nHost: localhost\r\nAuthorization: Bearer "
+                  + credential.ownerCredential()
+                  + "\r\nConnection: close\r\n\r\n")
+              .getBytes(StandardCharsets.ISO_8859_1));
+      out.flush();
+      ByteArrayOutputStream raw = new ByteArrayOutputStream();
+      socket.getInputStream().transferTo(raw);
+      return raw.toString(StandardCharsets.ISO_8859_1);
+    }
   }
 }

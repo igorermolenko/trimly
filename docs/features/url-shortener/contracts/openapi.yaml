@@ -186,8 +186,9 @@ paths:
             A paging parameter is invalid (resolves sad.md §6 "flagged for api"):
             - `link.invalid_page_size` — `limit` is not an integer from 1 to 100;
             - `link.invalid_cursor` — `after` is not a token this API issued;
-            - `shared.malformed_request` — the address is one Spring Security's firewall or the server itself
-              rejects (see `MalformedAddress`).
+            - `shared.malformed_request` — the query is not validly percent-encoded (for example `?after=%zz`
+              or a lone `%`), so no parameter can be read; or the address is one Spring Security's firewall
+              or the server itself rejects (see `MalformedAddress`).
           content:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }

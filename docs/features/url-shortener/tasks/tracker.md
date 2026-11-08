@@ -52,7 +52,7 @@
 | T42 | [Answer an address Tomcat itself rejects (bad percent-escape) with "Link not found." or a shared.malformed_request Problem](./tomcat-rejected-uri-answers.md) | ports | igorermolenko | S | — | done | COMMIT |
 | T43 | [Refuse to start with a public base URL that has a path, query, fragment or userinfo](./public-base-url-strict-validation.md) | app | igorermolenko | XS | — | done | COMMIT |
 | T44 | [Document the shared 400 on list/disable/enable, the required TRIMLY_* config vars, and the 23-AC count](./docs-sync-firewall-400-and-config.md) | docs | igorermolenko | XS | T42 | done | COMMIT |
-| T45 | [Answer a bad percent-escape in an owner-API query parameter with 400 shared.malformed_request, not 500](./list-query-bad-percent-escape.md) | ports | igorermolenko | XS | — | todo | — |
+| T45 | [Answer a bad percent-escape in an owner-API query parameter with 400 shared.malformed_request, not 500](./list-query-bad-percent-escape.md) | ports | igorermolenko | XS | — | done | COMMIT |
 | T46 | [Describe the valve's trigger as any request the server itself rejects, not only a bad address](./docs-server-rejected-request-wording.md) | docs | igorermolenko | XS | T45 | todo | — |
 | T47 | [Pin https:///path as UNSUPPORTED in TargetUrlTest](./target-url-triple-slash-test.md) | domain | igorermolenko | XS | — | todo | — |
 

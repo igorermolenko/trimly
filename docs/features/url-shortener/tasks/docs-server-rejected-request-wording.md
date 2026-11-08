@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/redirect/api/ServerRe
 owner: "igorermolenko"
 estimate: "XS"
 origin: "review _review/review-2026-11-08-r2.md S2 / F-30"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -34,11 +34,11 @@ AC-16b — verbatim text in [spec.md](../spec.md) §5.
 
 ## Checklist
 
-- [ ] `ServerRejectedAddressValve` javadoc and the comment at the 400 check: "a request the server itself rejects before trimly runs (a bad address, a missing or duplicate Host, an unreadable Content-Length)".
-- [ ] `openapi.yaml`: `MalformedAddress` description and the visitor `/{shortCode}` 404 description say the same.
-- [ ] `application.yml` comment above `server.tomcat` says the same.
-- [ ] `api-sync-report.md`: hand-edit note.
+- [x] `ServerRejectedAddressValve` javadoc and the comment at the 400 check: "a request the server itself rejects before trimly runs (a bad address, a missing or duplicate Host, an unreadable Content-Length)".
+- [x] `openapi.yaml`: `MalformedAddress` description and the visitor `/{shortCode}` 404 description say the same.
+- [x] `application.yml` comment above `server.tomcat` says the same.
+- [x] `api-sync-report.md`: hand-edit note.
 
 ## Definition of Done
 
-- [ ] No doc claims a narrower trigger than the code; verify + spotless green.
+- [x] No doc claims a narrower trigger than the code; verify + spotless green.

@@ -876,7 +876,7 @@
         "docs/features/url-shortener/contracts/api-sync-report.md"
       ],
       "file": "docs/features/url-shortener/tasks/docs-server-rejected-request-wording.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T47",

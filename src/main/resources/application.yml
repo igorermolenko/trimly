@@ -52,8 +52,9 @@ server:
   # Tomcat answers them with its own bare 400 before trimly runs, so a valid short code opened with
   # such a query is never redirected (AC-07) and such a path misses "Link not found." (AC-16b).
   # Whatever Spring Security's firewall still rejects is answered by VisitorRequestRejectedHandler;
-  # what Tomcat itself still rejects (a bad percent-escape such as %zz or a lone %, an encoded NUL or
-  # backslash, a path above the root) is answered by ServerRejectedAddressValve. Both give a visitor
+  # a request Tomcat itself still rejects (a bad percent-escape such as %zz or a lone %, an encoded NUL
+  # or backslash, a path above the root, a missing or duplicate Host, an unreadable Content-Length) is
+  # answered by ServerRejectedAddressValve. Both give a visitor
   # "Link not found." and an owner-API address a shared.malformed_request Problem.
   tomcat:
     relaxed-query-chars: ["{", "}", "|", "[", "]", "^", "`", "\\"]

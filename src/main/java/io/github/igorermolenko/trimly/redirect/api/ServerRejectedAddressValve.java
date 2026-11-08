@@ -8,13 +8,15 @@ import org.apache.catalina.valves.ErrorReportValve;
 import org.springframework.http.MediaType;
 
 /**
- * Tomcat rejects some addresses itself while decoding or normalising them: an invalid
- * percent-escape ({@code %zz}, a lone {@code %}), an encoded NUL or backslash, a path that climbs
- * above the root. That happens before any filter, the Spring Security firewall or the {@code
- * /error} page runs, so Tomcat's error-report valve would answer with its own HTML 400. This valve
- * takes its place on the host: a visitor gets the plain-text "link not found" (AC-16b), and an
- * owner-API address gets the shared {@code shared.malformed_request} Problem. Every other error
- * keeps Tomcat's default answer, without a report or server info.
+ * Tomcat rejects some requests itself, before any filter, the Spring Security firewall or the
+ * {@code /error} page runs, and its error-report valve would answer with its own HTML 400. Most are
+ * bad addresses it cannot decode or normalise: an invalid percent-escape ({@code %zz}, a lone
+ * {@code %}), an encoded NUL or backslash, a path that climbs above the root. Some are other
+ * request flaws, such as a missing or duplicate {@code Host} header or an unreadable {@code
+ * Content-Length}. This valve takes its place on the host and answers every such body-less 400 the
+ * same way: a visitor gets the plain-text "link not found" (AC-16b, hiding whether the link
+ * exists), and an owner-API address gets the shared {@code shared.malformed_request} Problem. Every
+ * other error keeps Tomcat's default answer, without a report or server info.
  */
 class ServerRejectedAddressValve extends ErrorReportValve {
 
@@ -32,7 +34,8 @@ class ServerRejectedAddressValve extends ErrorReportValve {
 
   @Override
   protected void report(Request request, Response response, Throwable throwable) {
-    // trimly's own 400s always carry a body; a body-less 400 is one Tomcat raised itself.
+    // trimly's own 400s always carry a body; a body-less 400 is a request Tomcat rejected itself
+    // (a bad address, a missing or duplicate Host, an unreadable Content-Length).
     if (response.getStatus() != 400 || throwable != null || response.getContentWritten() > 0) {
       super.report(request, response, throwable);
       return;

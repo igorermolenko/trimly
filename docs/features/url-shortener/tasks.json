@@ -785,7 +785,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/domain/TargetUrlTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/target-url-bare-scheme-unsupported.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T42",

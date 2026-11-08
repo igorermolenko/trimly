@@ -43,9 +43,10 @@ public record TargetUrl(String value) {
     try {
       uri = new URI(raw);
     } catch (URISyntaxException e) {
-      // A web address that only fails the strict parse carries characters that must be
-      // percent-encoded (AC-05); anything else is not a web address at all (AC-03).
-      throw new TargetUrlRejected(looksLikeWeb(raw) ? Reason.NOT_ENCODED : Reason.UNSUPPORTED);
+      // A web address with a usable host that only fails the strict parse further on carries
+      // characters that must be percent-encoded (AC-05); anything else, including an http(s)
+      // address with no host or a broken one, is not a web address at all (AC-03).
+      throw new TargetUrlRejected(hasUsableWebHost(raw) ? Reason.NOT_ENCODED : Reason.UNSUPPORTED);
     }
     String scheme = uri.getScheme();
     boolean web = "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
@@ -55,9 +56,23 @@ public record TargetUrl(String value) {
     return uri.getHost();
   }
 
-  private static boolean looksLikeWeb(String raw) {
+  private static boolean hasUsableWebHost(String raw) {
     String lower = raw.toLowerCase(Locale.ROOT);
-    return lower.startsWith("http://") || lower.startsWith("https://");
+    String scheme =
+        lower.startsWith("http://") ? "http" : lower.startsWith("https://") ? "https" : null;
+    if (scheme == null) {
+      return false;
+    }
+    String authority = raw.substring(scheme.length() + "://".length()).split("[/?#]", 2)[0];
+    if (authority.isEmpty()) {
+      return false;
+    }
+    try {
+      String host = new URI(scheme + "://" + authority).getHost();
+      return host != null && !host.isEmpty();
+    } catch (URISyntaxException e) {
+      return false;
+    }
   }
 
   private static boolean pointsTo(String host, Set<String> ownHosts) {

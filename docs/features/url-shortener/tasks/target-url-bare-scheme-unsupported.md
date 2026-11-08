@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/link/domain/TargetUrl
 owner: "igorermolenko"
 estimate: "XS"
 origin: "review _review/review-2026-11-08.md R1 / F-25"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -34,9 +34,9 @@ AC-03, AC-05 — verbatim text in [spec.md](../spec.md) §5.
 
 ## Checklist
 
-- [ ] In the `catch` of `TargetUrl.webHost`, return `NOT_ENCODED` only when the text after `scheme://` has a non-empty authority (at least one character before the first `/`, `?` or `#`); otherwise return `UNSUPPORTED`.
-- [ ] `TargetUrlTest`: `https://`, `http://`, `HTTPS://` and `https:///path` give `UNSUPPORTED`; the T39 `NOT_ENCODED` cases stay green.
+- [x] In the `catch` of `TargetUrl.webHost`, return `NOT_ENCODED` only when the text after `scheme://` has a non-empty authority (at least one character before the first `/`, `?` or `#`); otherwise return `UNSUPPORTED`.
+- [x] `TargetUrlTest`: `https://`, `http://`, `HTTPS://` and `https:///path` give `UNSUPPORTED`; the T39 `NOT_ENCODED` cases stay green.
 
 ## Definition of Done
 
-- [ ] TargetUrlTest green; verify + spotless green.
+- [x] TargetUrlTest green; verify + spotless green.

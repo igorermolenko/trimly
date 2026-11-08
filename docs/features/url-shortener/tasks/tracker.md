@@ -48,7 +48,7 @@
 | T38 | [Let browser-sent raw [ ] { } \| ^ ` characters reach trimly instead of Tomcat's bare 400](./tomcat-relaxed-url-chars.md) | ports | igorermolenko | S | — | done | COMMIT |
 | T39 | [Answer an unparseable http(s) target URL with the AC-05 percent-encoding guidance](./target-url-unparseable-not-encoded.md) | domain | igorermolenko | XS | — | done | COMMIT |
 | T40 | [List every shared.malformed_request trigger in openapi.yaml and close the stale sad.md §11 doc-drift risk](./docs-sync-malformed-request-and-sad-risk.md) | docs | igorermolenko | XS | — | done | COMMIT |
-| T41 | [Answer a bare https:// or http:// (no host) with the AC-03 answer, not the AC-05 encoding guidance](./target-url-bare-scheme-unsupported.md) | domain | igorermolenko | XS | — | todo | — |
+| T41 | [Answer a bare https:// or http:// (no host) with the AC-03 answer, not the AC-05 encoding guidance](./target-url-bare-scheme-unsupported.md) | domain | igorermolenko | XS | — | done | COMMIT |
 | T42 | [Answer an address Tomcat itself rejects (bad percent-escape) with "Link not found." or a shared.malformed_request Problem](./tomcat-rejected-uri-answers.md) | ports | igorermolenko | S | — | todo | — |
 | T43 | [Refuse to start with a public base URL that has a path, query, fragment or userinfo](./public-base-url-strict-validation.md) | app | igorermolenko | XS | — | todo | — |
 | T44 | [Document the shared 400 on list/disable/enable, the required TRIMLY_* config vars, and the 23-AC count](./docs-sync-firewall-400-and-config.md) | docs | igorermolenko | XS | T42 | todo | — |

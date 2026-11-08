@@ -100,6 +100,22 @@ class TargetUrlTest {
   @ParameterizedTest
   @ValueSource(
       strings = {
+        "https://",
+        "http://",
+        "HTTPS://",
+        "https://?q=1",
+        "https://#f",
+        "https://[::1",
+        "https://[::1/a|b",
+        "https://exa|mple.test/"
+      })
+  void aWebAddressWithoutAUsableHostIsUnsupportedNotNotEncoded(String raw) {
+    assertRejected(raw, Reason.UNSUPPORTED);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         "https://trimly.example.test/abc2345",
         "HTTPS://Trimly.Example.Test./x",
         "https://a.trimly.example.test/",

@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/redirect/api/", "src/
 owner: "igorermolenko"
 estimate: "S"
 origin: "review _review/review-2026-11-08.md R3 / F-26"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -34,13 +34,13 @@ AC-16b — verbatim text in [spec.md](../spec.md) §5; openapi `/{shortCode}` 40
 
 ## Checklist
 
-- [ ] Install a custom Tomcat `ErrorReportValve` on the Host through a `WebServerFactoryCustomizer`, replacing the one Boot adds. When the server raises a 400 itself and nothing has been written yet, the valve writes:
+- [x] Install a custom Tomcat `ErrorReportValve` on the Host through a `WebServerFactoryCustomizer`, replacing the one Boot adds. When the server raises a 400 itself and nothing has been written yet, the valve writes:
   - outside `/api`: 404 `text/plain` "Link not found." with `Cache-Control: no-store`;
   - under `/api`: 400 `application/problem+json` with `code: shared.malformed_request`, plus the owner-API no-cache and nosniff headers.
   Every other status keeps Tomcat's default body-less behaviour (no server info, no report).
-- [ ] Add raw-socket `RedirectIT` cases: `/abc%zz` and `/abc%` → 404 "Link not found.", `text/plain`, `no-store`, no lookup; `/api/v1/links/abc%zz/disable` with the credential → 400 `shared.malformed_request` Problem.
-- [ ] Correct the comment in `application.yml`.
+- [x] Add raw-socket `RedirectIT` cases: `/abc%zz` and `/abc%` → 404 "Link not found.", `text/plain`, `no-store`, no lookup; `/api/v1/links/abc%zz/disable` with the credential → 400 `shared.malformed_request` Problem.
+- [x] Correct the comment in `application.yml`.
 
 ## Definition of Done
 
-- [ ] RedirectIT green with the new cases; verify + spotless green.
+- [x] RedirectIT green with the new cases; verify + spotless green.

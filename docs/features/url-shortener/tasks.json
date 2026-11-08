@@ -802,7 +802,7 @@
         "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java"
       ],
       "file": "docs/features/url-shortener/tasks/tomcat-rejected-uri-answers.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T43",

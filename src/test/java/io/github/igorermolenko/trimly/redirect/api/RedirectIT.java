@@ -34,6 +34,9 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /** Visitors follow short links with no credential and get plain answers (AC-07…AC-19). */
 @Import(TestcontainersConfiguration.class)
@@ -41,6 +44,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 class RedirectIT {
 
   private static final String NOT_FOUND = "Link not found.";
+  private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @LocalServerPort int port;
   @Autowired JdbcTemplate jdbc;
@@ -180,6 +184,49 @@ class RedirectIT {
         .satisfies(type -> assertThat(type).startsWith("text/plain"));
     assertThat(response.headers("Cache-Control")).containsExactly("no-store");
     verifyNoInteractions(store);
+  }
+
+  // Tomcat itself rejects these while decoding or normalising the address, before any filter or
+  // error page runs (review 2026-11-08 R3). A browser sends a typed lone % as is.
+  @ParameterizedTest
+  @ValueSource(strings = {"/abc%zz", "/abc%", "/abc%2", "/abc%00", "/abc%5C", "/%2e%2e/x"})
+  void anAddressTomcatRejectsIsStillNotFoundWithoutAStorageLookup(String path) throws Exception {
+    clearInvocations(store);
+
+    RawResponse response = rawGet(path);
+
+    assertThat(response.status()).isEqualTo(404);
+    assertThat(response.body()).isEqualTo(NOT_FOUND);
+    assertThat(response.headers("Content-Type"))
+        .singleElement()
+        .satisfies(type -> assertThat(type).startsWith("text/plain"));
+    assertThat(response.headers("Cache-Control")).containsExactly("no-store");
+    verifyNoInteractions(store);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"/api/v1/links/abc%zz/disable", "/api/v1/links/abc%/enable", "/api/%00"})
+  void anOwnerApiAddressTomcatRejectsIsAMalformedRequestProblem(String path) throws Exception {
+    RawResponse response = rawGet(path);
+
+    assertThat(response.status()).isEqualTo(400);
+    assertThat(response.headers("Content-Type"))
+        .singleElement()
+        .satisfies(type -> assertThat(type).startsWith("application/problem+json"));
+    assertThat(response.body())
+        .contains("\"code\":\"shared.malformed_request\"")
+        .contains("\"type\":\"about:blank\"")
+        .contains("\"status\":400")
+        .doesNotContain(NOT_FOUND)
+        .doesNotContain("Tomcat")
+        .doesNotContain("<html");
+    // The same Problem the shared advice gives an address the firewall rejects.
+    JsonNode advice = JSON.readTree(get("/api/v1/links;x=1").body());
+    ((ObjectNode) advice).remove("instance");
+    assertThat(JSON.readTree(response.body())).isEqualTo(advice);
+    assertThat(response.headers("Cache-Control"))
+        .containsExactly("no-cache, no-store, max-age=0, must-revalidate");
+    assertThat(response.headers("X-Content-Type-Options")).containsExactly("nosniff");
   }
 
   @Test

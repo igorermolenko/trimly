@@ -1,22 +1,13 @@
 package io.github.igorermolenko.trimly.redirect.api;
 
-import io.github.igorermolenko.trimly.redirect.app.VisitorAnswer;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.security.web.firewall.HttpStatusRequestRejectedHandler;
 import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.security.web.firewall.RequestRejectedHandler;
-import org.springframework.security.web.header.HeaderWriter;
-import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
-import org.springframework.security.web.header.writers.XContentTypeOptionsHeaderWriter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -27,15 +18,14 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  * malformed code (AC-16b). An owner-API address is handed to Spring MVC's exception resolvers, so
  * the shared Problem Details advice answers it like any other malformed owner request. The firewall
  * runs before Spring Security's header writers, so the owner-API no-cache and nosniff headers are
- * written here.
+ * written here. Addresses Tomcat rejects before the firewall runs are answered the same way by
+ * {@link ServerRejectedAddressValve}.
  */
 @Component
 class VisitorRequestRejectedHandler implements RequestRejectedHandler {
 
   private final HandlerExceptionResolver ownerApi;
   private final RequestRejectedHandler fallback = new HttpStatusRequestRejectedHandler();
-  private final List<HeaderWriter> ownerApiHeaders =
-      List.of(new CacheControlHeadersWriter(), new XContentTypeOptionsHeaderWriter());
 
   VisitorRequestRejectedHandler(
       @Qualifier("handlerExceptionResolver") HandlerExceptionResolver ownerApi) {
@@ -46,18 +36,13 @@ class VisitorRequestRejectedHandler implements RequestRejectedHandler {
   public void handle(
       HttpServletRequest request, HttpServletResponse response, RequestRejectedException rejected)
       throws IOException, ServletException {
-    String path = request.getRequestURI();
-    if (path.equals("/api") || path.startsWith("/api/") || path.startsWith("/api;")) {
-      ownerApiHeaders.forEach(writer -> writer.writeHeaders(request, response));
+    if (RejectedAddressAnswers.isOwnerApi(request)) {
+      RejectedAddressAnswers.writeOwnerApiHeaders(request, response);
       if (ownerApi.resolveException(request, response, null, rejected) == null) {
         fallback.handle(request, response, rejected);
       }
       return;
     }
-    VisitorAnswer.Message notFound = VisitorAnswer.Message.NOT_FOUND;
-    response.setStatus(notFound.status());
-    response.setHeader(HttpHeaders.CACHE_CONTROL, CacheControl.noStore().getHeaderValue());
-    response.setContentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8).toString());
-    response.getWriter().write(notFound.text());
+    RejectedAddressAnswers.writeNotFound(response);
   }
 }

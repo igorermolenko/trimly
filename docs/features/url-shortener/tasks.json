@@ -839,6 +839,59 @@
       ],
       "file": "docs/features/url-shortener/tasks/docs-sync-firewall-400-and-config.md",
       "status": "done"
+    },
+    {
+      "id": "T45",
+      "title": "Answer a bad percent-escape in an owner-API query parameter with 400 shared.malformed_request, not 500",
+      "layer": "ports",
+      "deps": [],
+      "acs": [
+        "AC-09"
+      ],
+      "dod": "ProblemDetailsAdviceIT green with the new cases; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/shared/ProblemDetailsAdvice.java",
+        "src/test/java/io/github/igorermolenko/trimly/shared/ProblemDetailsAdviceIT.java",
+        "docs/features/url-shortener/contracts/openapi.yaml",
+        "docs/features/url-shortener/contracts/api-sync-report.md"
+      ],
+      "file": "docs/features/url-shortener/tasks/list-query-bad-percent-escape.md",
+      "status": "todo"
+    },
+    {
+      "id": "T46",
+      "title": "Describe the valve's trigger as any request the server itself rejects, not only a bad address",
+      "layer": "docs",
+      "deps": [
+        "T45"
+      ],
+      "acs": [
+        "AC-16b"
+      ],
+      "dod": "No doc claims a narrower trigger than the code; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/redirect/api/ServerRejectedAddressValve.java",
+        "src/main/resources/application.yml",
+        "docs/features/url-shortener/contracts/openapi.yaml",
+        "docs/features/url-shortener/contracts/api-sync-report.md"
+      ],
+      "file": "docs/features/url-shortener/tasks/docs-server-rejected-request-wording.md",
+      "status": "todo"
+    },
+    {
+      "id": "T47",
+      "title": "Pin https:///path as UNSUPPORTED in TargetUrlTest",
+      "layer": "domain",
+      "deps": [],
+      "acs": [
+        "AC-03"
+      ],
+      "dod": "TargetUrlTest green; verify + spotless green.",
+      "files_hint": [
+        "src/test/java/io/github/igorermolenko/trimly/link/domain/TargetUrlTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/target-url-triple-slash-test.md",
+      "status": "todo"
     }
   ]
 }

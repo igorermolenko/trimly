@@ -769,6 +769,76 @@
       ],
       "file": "docs/features/url-shortener/tasks/docs-sync-malformed-request-and-sad-risk.md",
       "status": "done"
+    },
+    {
+      "id": "T41",
+      "title": "Answer a bare https:// or http:// (no host) with the AC-03 answer, not the AC-05 encoding guidance",
+      "layer": "domain",
+      "deps": [],
+      "acs": [
+        "AC-03",
+        "AC-05"
+      ],
+      "dod": "TargetUrlTest green; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/domain/TargetUrl.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/domain/TargetUrlTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/target-url-bare-scheme-unsupported.md",
+      "status": "todo"
+    },
+    {
+      "id": "T42",
+      "title": "Answer an address Tomcat itself rejects (bad percent-escape) with \"Link not found.\" or a shared.malformed_request Problem",
+      "layer": "ports",
+      "deps": [],
+      "acs": [
+        "AC-16b"
+      ],
+      "dod": "RedirectIT green with the new cases; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/redirect/api/",
+        "src/main/resources/application.yml",
+        "src/test/java/io/github/igorermolenko/trimly/redirect/api/RedirectIT.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/tomcat-rejected-uri-answers.md",
+      "status": "todo"
+    },
+    {
+      "id": "T43",
+      "title": "Refuse to start with a public base URL that has a path, query, fragment or userinfo",
+      "layer": "app",
+      "deps": [],
+      "acs": [
+        "AC-01",
+        "AC-08"
+      ],
+      "dod": "LinkPropertiesTest green; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/link/app/LinkProperties.java",
+        "src/test/java/io/github/igorermolenko/trimly/link/app/LinkPropertiesTest.java"
+      ],
+      "file": "docs/features/url-shortener/tasks/public-base-url-strict-validation.md",
+      "status": "todo"
+    },
+    {
+      "id": "T44",
+      "title": "Document the shared 400 on list/disable/enable, the required TRIMLY_* config vars, and the 23-AC count",
+      "layer": "docs",
+      "deps": [
+        "T42"
+      ],
+      "acs": [],
+      "dod": "No doc contradicts the code on these points; OwnerApiContractIT still green.",
+      "files_hint": [
+        "docs/features/url-shortener/contracts/openapi.yaml",
+        "docs/features/url-shortener/contracts/api-sync-report.md",
+        "CLAUDE.md",
+        "docs/architecture-map.md",
+        "docs/features/url-shortener/test-plan.md"
+      ],
+      "file": "docs/features/url-shortener/tasks/docs-sync-firewall-400-and-config.md",
+      "status": "todo"
     }
   ]
 }

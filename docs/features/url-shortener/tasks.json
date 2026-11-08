@@ -819,7 +819,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/app/LinkPropertiesTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/public-base-url-strict-validation.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T44",

@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/link/app/LinkProperti
 owner: "igorermolenko"
 estimate: "XS"
 origin: "review _review/review-2026-11-08.md R4 / F-27"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -34,9 +34,9 @@ AC-01, AC-08 — verbatim text in [spec.md](../spec.md) §5.
 
 ## Checklist
 
-- [ ] `LinkProperties`: the base URL also has an empty path and no query, fragment or userinfo. Each `own-hosts` entry is a bare host name (no scheme, `/`, `:`, `@` or whitespace).
-- [ ] `LinkPropertiesTest`: `…/s`, `…?x=1`, `…#f`, `https://u@host` and an `own-hosts` entry `https://x.test` are refused; the existing valid cases stay green.
+- [x] `LinkProperties`: the base URL also has an empty path and no query, fragment or userinfo. Each `own-hosts` entry is a bare host name (no scheme, `/`, `:`, `@` or whitespace).
+- [x] `LinkPropertiesTest`: `…/s`, `…?x=1`, `…#f`, `https://u@host` and an `own-hosts` entry `https://x.test` are refused; the existing valid cases stay green.
 
 ## Definition of Done
 
-- [ ] LinkPropertiesTest green; verify + spotless green.
+- [x] LinkPropertiesTest green; verify + spotless green.

@@ -78,6 +78,54 @@ class LinkPropertiesTest {
     }
   }
 
+  @Test
+  void refusesAPublicBaseUrlWithAPathQueryFragmentOrUserinfo() {
+    for (String bad :
+        new String[] {
+          "https://trimly.example.test/s",
+          "https://trimly.example.test?x=1",
+          "https://trimly.example.test#f",
+          "https://owner@trimly.example.test"
+        }) {
+      runner
+          .withPropertyValues(
+              "trimly.public-base-url=" + bad, "trimly.own-hosts=trimly.example.test")
+          .run(context -> assertThat(context).as(bad).hasFailed());
+    }
+  }
+
+  @Test
+  void acceptsAPublicBaseUrlWithAPort() {
+    runner
+        .withPropertyValues(
+            "trimly.public-base-url=http://localhost:8080", "trimly.own-hosts=localhost")
+        .run(context ->
+            assertThat(context.getBean(LinkProperties.class).shortUrlFor("abc2345"))
+                .isEqualTo("http://localhost:8080/abc2345"));
+  }
+
+  @Test
+  void refusesAnOwnHostThatIsNotABareHostName() {
+    for (String bad :
+        new String[] {
+          "https://x.example.test", "x.example.test/", "x.example.test:443", "u@x.example.test"
+        }) {
+      runner
+          .withPropertyValues(
+              "trimly.public-base-url=https://trimly.example.test", "trimly.own-hosts=" + bad)
+          .run(context -> assertThat(context).as(bad).hasFailed());
+    }
+  }
+
+  @Test
+  void acceptsAnIpv6LiteralOwnHost() {
+    runner
+        .withPropertyValues(
+            "trimly.public-base-url=https://trimly.example.test", "trimly.own-hosts=[::1]")
+        .run(context ->
+            assertThat(context.getBean(LinkProperties.class).ownHosts()).contains("[::1]"));
+  }
+
   @Configuration(proxyBeanMethods = false)
   @EnableConfigurationProperties(LinkProperties.class)
   static class Config {}

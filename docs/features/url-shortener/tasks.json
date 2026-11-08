@@ -891,7 +891,7 @@
         "src/test/java/io/github/igorermolenko/trimly/link/domain/TargetUrlTest.java"
       ],
       "file": "docs/features/url-shortener/tasks/target-url-triple-slash-test.md",
-      "status": "todo"
+      "status": "done"
     }
   ]
 }

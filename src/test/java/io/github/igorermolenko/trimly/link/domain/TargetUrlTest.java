@@ -103,6 +103,7 @@ class TargetUrlTest {
         "https://",
         "http://",
         "HTTPS://",
+        "https:///path",
         "https://?q=1",
         "https://#f",
         "https://[::1",

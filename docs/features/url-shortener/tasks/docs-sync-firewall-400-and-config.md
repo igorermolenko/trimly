@@ -9,8 +9,8 @@ files_hint: ["docs/features/url-shortener/contracts/openapi.yaml", "docs/feature
 owner: "igorermolenko"
 estimate: "XS"
 origin: "review _review/review-2026-11-08.md R2, R5 / F-28"
-status: "todo"
-step: "—"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -30,10 +30,10 @@ Review R2: the firewall-rejected 400 `shared.malformed_request` is documented on
 
 ## Checklist
 
-- [ ] `openapi.yaml`: a shared `components/responses` 400 (`shared.malformed_request`: an address the firewall or the server rejects), referenced from list, disable and enable; `api-sync-report.md` records the hand edit.
-- [ ] `CLAUDE.md` Config bullet and `docs/architecture-map.md` §Conventions name `TRIMLY_PUBLIC_BASE_URL` and `TRIMLY_OWN_HOSTS`.
-- [ ] `test-plan.md`: 22 → 23 acceptance criteria.
+- [x] `openapi.yaml`: a shared `components/responses` 400 (`shared.malformed_request`: an address the firewall or the server rejects), referenced from list, disable and enable; `api-sync-report.md` records the hand edit.
+- [x] `CLAUDE.md` Config bullet and `docs/architecture-map.md` §Conventions name `TRIMLY_PUBLIC_BASE_URL` and `TRIMLY_OWN_HOSTS`.
+- [x] `test-plan.md`: 22 → 23 acceptance criteria.
 
 ## Definition of Done
 
-- [ ] No doc contradicts the code on these points; OwnerApiContractIT still green.
+- [x] No doc contradicts the code on these points; OwnerApiContractIT still green.

@@ -8,7 +8,7 @@ feature_size: "M"
 
 # Test plan — url-shortener
 
-The owner, recognised by one owner credential, creates, lists, disables and re-enables short links through an owner API. Anyone can follow a short link without a credential and gets either a non-reusable redirect, "link not found" or "temporarily unavailable". Every one of the 22 acceptance criteria in spec.md §5 maps to at least one test below.
+The owner, recognised by one owner credential, creates, lists, disables and re-enables short links through an owner API. Anyone can follow a short link without a credential and gets either a non-reusable redirect, "link not found" or "temporarily unavailable". Every one of the 23 acceptance criteria in spec.md §5 maps to at least one test below.
 
 > **Inputs:** [spec.md](spec.md) §5/§6/§6.1, [sad.md](sad.md) §6/§10 (`target_surfaces: [backend-service]`, so the UI tiers are not used), [data-model.md](data-model.md), [contracts/openapi.yaml](contracts/openapi.yaml), [tasks.json](tasks.json).
 

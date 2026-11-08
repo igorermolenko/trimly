@@ -85,7 +85,7 @@ paths:
             - `link.target_url_points_to_trimly` — host is one of trimly's own hosts or a subdomain (AC-06);
             - `shared.malformed_request` — the body is not a JSON object, the Content-Type is missing or not JSON,
               the body carries a member other than `targetUrl` (including a misspelt one), or the address is one
-              Spring Security's firewall rejects.
+              Spring Security's firewall or the server itself rejects (see `MalformedAddress`).
           content:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
@@ -185,7 +185,9 @@ paths:
           description: |
             A paging parameter is invalid (resolves sad.md §6 "flagged for api"):
             - `link.invalid_page_size` — `limit` is not an integer from 1 to 100;
-            - `link.invalid_cursor` — `after` is not a token this API issued.
+            - `link.invalid_cursor` — `after` is not a token this API issued;
+            - `shared.malformed_request` — the address is one Spring Security's firewall or the server itself
+              rejects (see `MalformedAddress`).
           content:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
@@ -206,6 +208,13 @@ paths:
                     detail: "The continuation token is not valid. Start again from the first page."
                     instance: /api/v1/links
                     code: link.invalid_cursor
+                malformedAddress:
+                  value:
+                    type: "about:blank"
+                    title: Bad Request
+                    status: 400
+                    detail: "The request address is not valid."
+                    code: shared.malformed_request
         "401": { $ref: "#/components/responses/AuthenticationRequired" }
         "503": { $ref: "#/components/responses/OwnerTemporarilyUnavailable" }
 
@@ -229,6 +238,7 @@ paths:
               example:
                 shortCode: "aB3dEf9"
                 state: DISABLED
+        "400": { $ref: "#/components/responses/MalformedAddress" }
         "401": { $ref: "#/components/responses/AuthenticationRequired" }
         "404": { $ref: "#/components/responses/OwnerLinkNotFound" }
         "503": { $ref: "#/components/responses/OwnerTemporarilyUnavailable" }
@@ -253,6 +263,7 @@ paths:
               example:
                 shortCode: "aB3dEf9"
                 state: ACTIVE
+        "400": { $ref: "#/components/responses/MalformedAddress" }
         "401": { $ref: "#/components/responses/AuthenticationRequired" }
         "404": { $ref: "#/components/responses/OwnerLinkNotFound" }
         "503": { $ref: "#/components/responses/OwnerTemporarilyUnavailable" }
@@ -299,7 +310,9 @@ paths:
         "404":
           description: |
             "Link not found" — the code is unknown, disabled or malformed; identical in every case,
-            with no hint whether the code ever existed (AC-12, AC-16, AC-16b).
+            with no hint whether the code ever existed (AC-12, AC-16, AC-16b). An address Spring
+            Security's firewall or the server itself rejects (a `;`, an encoded `/`, a bad
+            percent-escape such as `%zz` or a lone `%`) gets the same answer.
           headers:
             Cache-Control:
               $ref: "#/components/headers/NoStore"
@@ -383,6 +396,24 @@ components:
             detail: "The link was not found."
             instance: /api/v1/links/aB3dEf9/disable
             code: link.not_found
+
+    MalformedAddress:
+      description: |
+        The request address can never name an operation, and nothing is read or changed. Either
+        Spring Security's firewall rejects it (a `;`, an encoded `/` or `%`, an empty segment, for
+        example `/api/v1/links/ab%2Fcdef/disable`) or the server itself does while decoding it (a bad
+        percent-escape such as `%zz` or a lone `%`, an encoded NUL or backslash, a path above the
+        root). Answered before the credential is checked, with the owner-API no-cache and nosniff
+        headers (review 2026-11-08 R2, R3).
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+          example:
+            type: "about:blank"
+            title: Bad Request
+            status: 400
+            detail: "The request address is not valid."
+            code: shared.malformed_request
 
     OwnerTemporarilyUnavailable:
       description: |

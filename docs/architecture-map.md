@@ -75,7 +75,7 @@ There's no code yet, so each rule cites the ADR or brief section that decided it
   - Tests mirror the main package layout (*scaffold S2*).
 - **Formatting / lint:** Spotless with google-java-format; CI fails on `./mvnw -B spotless:check` (*scaffold S2*).
 - **CI:** one GitHub Actions workflow, `.github/workflows/ci.yml`, runs `./mvnw -B verify` and `spotless:check` on every push and pull request, on JDK 21 (*scaffold S4*). Deploying to Fly.io is a separate roadmap step, not part of the foundation.
-- **Config / secrets:** secrets come only from env vars and are never committed. `application.yml` holds non-secret defaults only.
+- **Config / secrets:** secrets come only from env vars and are never committed. `application.yml` holds non-secret defaults only. Production must also set `TRIMLY_OWNER_CREDENTIAL`, `TRIMLY_PUBLIC_BASE_URL` (http(s), host and optional port only) and `TRIMLY_OWN_HOSTS` (bare host names); trimly refuses to start without them.
 - **Inter-module communication:** direct method calls to another module's published `app` type. No events or HTTP between modules unless a later design adds them.
 - **UI / styling:** none; the service is backend-only (see §Frontend).
 

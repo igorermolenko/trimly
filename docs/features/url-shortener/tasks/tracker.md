@@ -51,6 +51,6 @@
 | T41 | [Answer a bare https:// or http:// (no host) with the AC-03 answer, not the AC-05 encoding guidance](./target-url-bare-scheme-unsupported.md) | domain | igorermolenko | XS | — | done | COMMIT |
 | T42 | [Answer an address Tomcat itself rejects (bad percent-escape) with "Link not found." or a shared.malformed_request Problem](./tomcat-rejected-uri-answers.md) | ports | igorermolenko | S | — | done | COMMIT |
 | T43 | [Refuse to start with a public base URL that has a path, query, fragment or userinfo](./public-base-url-strict-validation.md) | app | igorermolenko | XS | — | done | COMMIT |
-| T44 | [Document the shared 400 on list/disable/enable, the required TRIMLY_* config vars, and the 23-AC count](./docs-sync-firewall-400-and-config.md) | docs | igorermolenko | XS | T42 | todo | — |
+| T44 | [Document the shared 400 on list/disable/enable, the required TRIMLY_* config vars, and the 23-AC count](./docs-sync-firewall-400-and-config.md) | docs | igorermolenko | XS | T42 | done | COMMIT |
 
 **Total:** 44 tasks — 16 planned (~12.5 person-days) + 9 review follow-ups T17–T25 from `_review/review-2026-11-07.md` + 7 review follow-ups T26–T32 from `_review/review-2026-11-07-r2.md` + 5 review follow-ups T33–T37 from `_review/review-2026-11-07-r3.md` + 3 review follow-ups T38–T40 from `_review/review-2026-11-07-r4.md` + 4 review follow-ups T41–T44 from `_review/review-2026-11-08.md`.

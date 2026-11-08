@@ -838,7 +838,7 @@
         "docs/features/url-shortener/test-plan.md"
       ],
       "file": "docs/features/url-shortener/tasks/docs-sync-firewall-400-and-config.md",
-      "status": "todo"
+      "status": "done"
     }
   ]
 }

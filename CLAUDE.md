@@ -43,7 +43,9 @@ Stack: Java 21, Spring Boot 4.1, Maven via the committed wrapper (`./mvnw`) — 
   `TRIMLY_OWNER_CREDENTIAL`; trimly refuses to start without a strong one (tests use
   `src/test/resources/config/application.yml`). The DB connection comes from
   `SPRING_DATASOURCE_URL` / `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD`.
-  `application.yml` holds non-secret defaults only.
+  trimly also refuses to start without `TRIMLY_PUBLIC_BASE_URL` (the address short links are built
+  from: http(s), host and optional port only) and `TRIMLY_OWN_HOSTS` (trimly's own host names,
+  which targets may not point to). `application.yml` holds non-secret defaults only.
 - Persistence, migrations and IDs: [ADR-0003](docs/adr/0003-store-links-in-postgres-on-neon-via-spring-data-jdbc-and-flyway.md).
 
 ## Tests

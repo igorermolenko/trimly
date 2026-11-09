@@ -79,4 +79,4 @@ Step 6 enters a wave after its recon pass gives it a size.
 
 | Step | Shipped | Link |
 |---|---|---|
-| 2 · Create a short link and get redirected | 2026-11-09 | [changelog](features/url-shortener/CHANGELOG.md) |
+| 2 · Create a short link and get redirected | 2026-11-09 | [changelog](features/url-shortener/CHANGELOG.md) · [PR #1](https://github.com/igorermolenko/trimly/pull/1) |

@@ -78,11 +78,20 @@ class ProblemDetailsAdviceIT {
         "shared.not_acceptable");
   }
 
-  // Tomcat cannot decode these queries; every parameter read then throws (review 2026-11-08-r2 S1).
-  // A client sends them as typed, so the request target goes over a raw socket.
+  // Tomcat cannot read these queries' parameters: some are not validly percent-encoded (review
+  // 2026-11-08-r2 S1), others hold a parameter with an empty name (review 2026-11-09 T1). The first
+  // parameter read throws. A client sends them as typed, so the request target goes over a raw
+  // socket.
   @ParameterizedTest
-  @ValueSource(strings = {"/api/v1/links?after=%zz", "/api/v1/links?limit=%", "/api/v1/links?a=%2"})
-  void aQueryThatIsNotValidlyPercentEncodedIsAMalformedRequest(String target) throws Exception {
+  @ValueSource(
+      strings = {
+        "/api/v1/links?after=%zz",
+        "/api/v1/links?limit=%",
+        "/api/v1/links?a=%2",
+        "/api/v1/links?=x",
+        "/api/v1/links?limit=20&="
+      })
+  void aQueryWhoseParametersTheServerCannotReadIsAMalformedRequest(String target) throws Exception {
     String response = rawOwnerGet(target);
 
     String head = response.substring(0, response.indexOf("\r\n\r\n")).toLowerCase(Locale.ROOT);

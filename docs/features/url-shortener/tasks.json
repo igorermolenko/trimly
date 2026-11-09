@@ -909,7 +909,7 @@
         "docs/features/url-shortener/contracts/api-sync-report.md"
       ],
       "file": "docs/features/url-shortener/tasks/docs-invalid-parameter-triggers.md",
-      "status": "todo"
+      "status": "done"
     }
   ]
 }

@@ -9,8 +9,8 @@ files_hint: ["src/main/java/io/github/igorermolenko/trimly/shared/ProblemDetails
 owner: "igorermolenko"
 estimate: "XS"
 origin: "review _review/review-2026-11-09.md T1 / F-32"
-status: "todo"
-step: "SELECT"
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Follow-up task from the review gate. Work from what is inlined here; the review record and the
@@ -39,11 +39,11 @@ AC-09 — verbatim text in [spec.md](../spec.md) §5.
 
 ## Checklist
 
-- [ ] `ProblemDetailsAdviceIT`: `?=x` answers 400 `shared.malformed_request` with the owner-API headers.
-- [ ] `ProblemDetailsAdvice` javadoc and the IT comment: "the server cannot read the request's parameters" + the four triggers; "the first parameter read throws".
-- [ ] `openapi.yaml` list 400: the same wording.
-- [ ] `api-sync-report.md`: correct the T45 note ("every parameter read") and add a hand-edit note.
+- [x] `ProblemDetailsAdviceIT`: `?=x` answers 400 `shared.malformed_request` with the owner-API headers.
+- [x] `ProblemDetailsAdvice` javadoc and the IT comment: "the server cannot read the request's parameters" + the four triggers; "the first parameter read throws".
+- [x] `openapi.yaml` list 400: the same wording.
+- [x] `api-sync-report.md`: correct the T45 note ("every parameter read") and add a hand-edit note.
 
 ## Definition of Done
 
-- [ ] No doc claims a narrower trigger than the code; verify + spotless green.
+- [x] No doc claims a narrower trigger than the code; verify + spotless green.

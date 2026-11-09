@@ -58,8 +58,10 @@ class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
   /**
    * An owner-API address that can never name an operation: {@code code: shared.malformed_request}.
    * Either Spring Security's firewall rejected it (a {@code ;}, an encoded {@code /} or {@code %}),
-   * or its query is not validly percent-encoded ({@code ?after=%zz}, a lone {@code %}), so Tomcat
-   * throws on every parameter read.
+   * or the server cannot read the request's parameters: a query that is not validly percent-encoded
+   * ({@code ?after=%zz}, a lone {@code %}), a parameter with an empty name ({@code ?=x}), more
+   * parameters than the server accepts, or an unreadable form body. Tomcat then throws {@link
+   * InvalidParameterException} on the first parameter read.
    */
   @ExceptionHandler({RequestRejectedException.class, InvalidParameterException.class})
   ProblemDetail handleRejectedAddress(Exception ex) {

@@ -55,6 +55,6 @@
 | T45 | [Answer a bad percent-escape in an owner-API query parameter with 400 shared.malformed_request, not 500](./list-query-bad-percent-escape.md) | ports | igorermolenko | XS | — | done | COMMIT |
 | T46 | [Describe the valve's trigger as any request the server itself rejects, not only a bad address](./docs-server-rejected-request-wording.md) | docs | igorermolenko | XS | T45 | done | COMMIT |
 | T47 | [Pin https:///path as UNSUPPORTED in TargetUrlTest](./target-url-triple-slash-test.md) | domain | igorermolenko | XS | — | done | COMMIT |
-| T48 | [Name every trigger of the owner-API unreadable-parameters 400, and pin ?=x](./docs-invalid-parameter-triggers.md) | docs | igorermolenko | XS | — | todo | SELECT |
+| T48 | [Name every trigger of the owner-API unreadable-parameters 400, and pin ?=x](./docs-invalid-parameter-triggers.md) | docs | igorermolenko | XS | — | done | COMMIT |
 
 **Total:** 48 tasks — 16 planned (~12.5 person-days) + 9 review follow-ups T17–T25 from `_review/review-2026-11-07.md` + 7 review follow-ups T26–T32 from `_review/review-2026-11-07-r2.md` + 5 review follow-ups T33–T37 from `_review/review-2026-11-07-r3.md` + 3 review follow-ups T38–T40 from `_review/review-2026-11-07-r4.md` + 4 review follow-ups T41–T44 from `_review/review-2026-11-08.md` + 3 review follow-ups T45–T47 from `_review/review-2026-11-08-r2.md` + 1 review follow-up T48 from `_review/review-2026-11-09.md`.

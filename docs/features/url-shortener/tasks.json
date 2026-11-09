@@ -892,6 +892,24 @@
       ],
       "file": "docs/features/url-shortener/tasks/target-url-triple-slash-test.md",
       "status": "done"
+    },
+    {
+      "id": "T48",
+      "title": "Name every trigger of the owner-API unreadable-parameters 400, and pin ?=x",
+      "layer": "docs",
+      "deps": [],
+      "acs": [
+        "AC-09"
+      ],
+      "dod": "No doc claims a narrower trigger than the code; verify + spotless green.",
+      "files_hint": [
+        "src/main/java/io/github/igorermolenko/trimly/shared/ProblemDetailsAdvice.java",
+        "src/test/java/io/github/igorermolenko/trimly/shared/ProblemDetailsAdviceIT.java",
+        "docs/features/url-shortener/contracts/openapi.yaml",
+        "docs/features/url-shortener/contracts/api-sync-report.md"
+      ],
+      "file": "docs/features/url-shortener/tasks/docs-invalid-parameter-triggers.md",
+      "status": "todo"
     }
   ]
 }

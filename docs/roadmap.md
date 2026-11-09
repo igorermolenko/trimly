@@ -1,6 +1,6 @@
 ---
 status: living
-updated_at: "2026-11-02"
+updated_at: "2026-11-09"
 ---
 
 # Roadmap — trimly
@@ -20,7 +20,7 @@ trimly runs always-on at a public URL for about $5 a month as a Java service, bu
 | # | Step | Source | Size | Status |
 |---|---|---|:---:|---|
 | 1 | Project skeleton: the Maven/Spring Boot project, test harness, Flyway and CI are in place, so `./mvnw -B verify` passes (`docs/features/_scaffold/tasks.json`) | `docs/architecture-map.md` §Conventions | S | idea |
-| 2 | Create a short link and get redirected: the owner creates a link with a generated code through an authenticated API, and anyone opening it is redirected ([`features/url-shortener/`](features/url-shortener/spec.md)) | `docs/idea-brief.md` §7. Recommendation | M | building |
+| 2 | Create a short link and get redirected: the owner creates a link with a generated code through an authenticated API, and anyone opening it is redirected ([`features/url-shortener/`](features/url-shortener/spec.md)) | `docs/idea-brief.md` §7. Recommendation | M | shipped |
 | 3 | Deploy to Fly.io: the service runs always-on at a public URL against Neon Postgres, deployed from CI | `docs/idea-brief.md` §5. Out of scope (Constraints) | S | idea |
 | 4 | Invite others to create links: invited users, not only the owner, can create short links | `docs/idea-brief.md` §5. Out of scope | S | idea |
 | 5 | Custom aliases: a link creator picks the short code instead of getting a generated one | `docs/idea-brief.md` §7. Recommendation | S | idea |
@@ -79,3 +79,4 @@ Step 6 enters a wave after its recon pass gives it a size.
 
 | Step | Shipped | Link |
 |---|---|---|
+| 2 · Create a short link and get redirected | 2026-11-09 | [changelog](features/url-shortener/CHANGELOG.md) |

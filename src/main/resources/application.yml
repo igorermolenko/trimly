@@ -4,13 +4,80 @@
 spring:
   application:
     name: trimly
+  # Every link-storage call answers within 2 s (ADR-0003). The budget is the sum of these bounds:
+  #   acquire a connection (incl. validating a pooled one, or connecting/waking Neon) <= 1400 ms
+  #   + the statement on it: server statement_timeout 500 ms, and a 600 ms client network timeout
+  #     (trimly.storage.statement-network-timeout) that also bounds a server that stops answering
+  #   = at most ~2.0 s before a DataAccessException that link.app reports as "unavailable".
+  # The driver timeouts are whole seconds and also apply to the login, where a Neon wake happens,
+  # so they stay at 2 s: a wake up to 1.4 s is served on the same request, and a slower one still
+  # lands its connection in the pool for the next request. StorageConnectionConfiguration lowers
+  # each connection's network timeout to the statement share once the login is done.
+  # The pool drains when idle (minimum-idle 0, idle-timeout at Hikari's 10 s floor), so Neon can
+  # scale to zero; the first request after idle opens a fresh connection inside the same budget.
+  datasource:
+    hikari:
+      minimum-idle: 0
+      idle-timeout: 10000
+      connection-timeout: 1400
+      validation-timeout: 250
+      connection-init-sql: SET statement_timeout = 500
+      data-source-properties:
+        connectTimeout: 2
+        loginTimeout: 2
+        socketTimeout: 2
   flyway:
     locations: classpath:db/migration
   mvc:
     problemdetails:
       enabled: true
+  # Request bodies are closed (openapi.yaml: additionalProperties: false): an unknown member,
+  # including a misspelt one, is a malformed request, not silently dropped.
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+
+# trimly.public-base-url and trimly.own-hosts have no defaults: production must set
+# TRIMLY_PUBLIC_BASE_URL and TRIMLY_OWN_HOSTS (domain: roadmap D2), or trimly refuses to start.
+# Local and test values live in src/test/resources/config/application.yml.
+trimly:
+  storage:
+    statement-network-timeout: 600ms
 
 server:
   error:
     include-stacktrace: never
     include-message: never
+  # Browsers send these characters unencoded in the query (and | [ ] ^ in the path). Without this,
+  # Tomcat answers them with its own bare 400 before trimly runs, so a valid short code opened with
+  # such a query is never redirected (AC-07) and such a path misses "Link not found." (AC-16b).
+  # Whatever Spring Security's firewall still rejects is answered by VisitorRequestRejectedHandler;
+  # a request Tomcat itself still rejects (a bad percent-escape such as %zz or a lone %, an encoded NUL
+  # or backslash, a path above the root, a missing or duplicate Host, an unreadable Content-Length) is
+  # answered by ServerRejectedAddressValve. Both give a visitor
+  # "Link not found." and an owner-API address a shared.malformed_request Problem.
+  tomcat:
+    relaxed-query-chars: ["{", "}", "|", "[", "]", "^", "`", "\\"]
+    relaxed-path-chars: ["|", "[", "]", "^"]
+
+# Health and metrics live on a separate management port that is never routed publicly (sad §7).
+# Health checks must not touch link storage, so the pool can drain and Neon can scale to zero.
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  # Fly's machine checks use the liveness-only group, /actuator/health/liveness (ADR-0006).
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: false
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true

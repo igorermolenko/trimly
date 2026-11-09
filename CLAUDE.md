@@ -21,7 +21,8 @@ Stack: Java 21, Spring Boot 4.1, Maven via the committed wrapper (`./mvnw`) — 
 
 - Root package `io.github.igorermolenko.trimly`; `TrimlyApplication` sits at the root.
 - Each top-level package under the root is a module: `link` (write path), `redirect` (read path),
-  `shared` (cross-cutting only: error envelope, ID generator, clock — no business logic).
+  `access` (owner authentication: Spring Security bearer-token chain on `/api/**`, owner-credential
+  policy), `shared` (cross-cutting only: error envelope, ID generator, clock — no business logic).
 - Layers inside a module: `api` (HTTP controllers, DTOs) / `app` (use cases, transactions) /
   `domain` (plain Java — **no Spring or persistence imports**) / `infra` (persistence, outside adapters).
 - Modules use only each other's published `api`/`app` types, through direct method calls (no events or
@@ -38,9 +39,13 @@ Stack: Java 21, Spring Boot 4.1, Maven via the committed wrapper (`./mvnw`) — 
 - **Time:** inject `java.time.Clock` (bean in `shared`); don't call `now()` without it.
 - **Errors:** RFC 9457 Problem Details (`ProblemDetail`) via the single `@RestControllerAdvice` in
   `shared`. Never expose stack traces or exception messages.
-- **Config / secrets:** secrets only from env vars, never committed. The DB connection comes from
+- **Config / secrets:** secrets only from env vars, never committed. The owner credential comes from
+  `TRIMLY_OWNER_CREDENTIAL`; trimly refuses to start without a strong one (tests use
+  `src/test/resources/config/application.yml`). The DB connection comes from
   `SPRING_DATASOURCE_URL` / `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD`.
-  `application.yml` holds non-secret defaults only.
+  trimly also refuses to start without `TRIMLY_PUBLIC_BASE_URL` (the address short links are built
+  from: http(s), host and optional port only) and `TRIMLY_OWN_HOSTS` (trimly's own host names,
+  which targets may not point to). `application.yml` holds non-secret defaults only.
 - Persistence, migrations and IDs: [ADR-0003](docs/adr/0003-store-links-in-postgres-on-neon-via-spring-data-jdbc-and-flyway.md).
 
 ## Tests

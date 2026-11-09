@@ -1,0 +1,544 @@
+# Derived contract for url-shortener — do not hand-edit; re-derive with `/sdd:api url-shortener --reconcile`.
+#   fields + constraints  ← data-model.md (short_link)
+#   error responses       ← sad.md §6 alt-branches (critical flows 1–2, List, Disable or re-enable)
+#   endpoint list + shape ← spec.md §4 US-01…US-07 / §5 AC-01…AC-20b
+# Deviations from the plugin defaults (recorded in api-sync-report.md):
+#   - error body is RFC 9457 Problem Details + a `code` extension member (repo convention: CLAUDE.md,
+#     architecture-map.md §Error handling, sad.md §8), not the bare {code, message, details?} envelope;
+#   - the visitor redirect answers in text/plain, never Problem Details (feature ADR-0005);
+#   - the link list pages forward only (ADR-0004, AC-09): no `before`, no `hasPrev`;
+#   - JSON members are camelCase (Spring/Jackson default, matches ProblemDetail's own members).
+openapi: 3.1.0
+
+info:
+  title: trimly url-shortener API
+  version: 0.1.0
+  description: |
+    Long web addresses, especially ones carrying tracking parameters, look cluttered, break
+    formatting in messages and are hard to type. This API lets trimly's owner turn any http(s)
+    address into a short, hand-typeable link, list their links, and switch any link off (and back
+    on) for everyone at once. Anyone who opens a short link is redirected to its target URL; every
+    visit passes through trimly, so a disable takes effect on the very next visit.
+
+    Two audiences, two answer styles:
+    - **Owner API** (`/api/v1/links…`) — requires the owner credential as a bearer token; errors
+      are RFC 9457 Problem Details (`application/problem+json`) with a stable `code` member.
+    - **Visitor redirect** (`/{shortCode}`) — public; answers with a non-reusable temporary
+      redirect or a short plain-text sentence ("link not found" / "temporarily unavailable").
+
+servers:
+  - url: "{publicBaseUrl}"
+    description: trimly's single configured public address (`trimly.public-base-url`; domain is roadmap decision D2)
+    variables:
+      publicBaseUrl:
+        default: http://localhost:8080
+
+# Global default — every operation requires the owner credential unless it declares `security: []`.
+security:
+  - BearerAuth: []
+
+tags:
+  - name: owner
+    description: Link management — owner credential required (US-01, US-03, US-04, US-05, US-07)
+  - name: visitor
+    description: Public redirects — no credential (US-02, US-06)
+
+paths:
+  /api/v1/links:
+    post:
+      tags: [owner]
+      summary: Create a short link
+      description: |
+        US-01. Always issues a new short link with a freshly generated 7-character short code,
+        even when the same target URL was shortened before (AC-02). The target URL is stored and
+        later redirected to exactly as submitted — never trimmed, normalised or re-encoded (AC-01,
+        AC-05). `shortUrl` is built from the configured public address, whatever host the request
+        arrived on (AC-01). Not idempotent and no `Idempotency-Key`: a retry after an unconfirmed
+        create may produce a second link, which the owner can disable (AC-17b).
+      operationId: createShortLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ShortLinkCreate" }
+            example:
+              targetUrl: "https://example.test/articles/1?utm_source=newsletter"
+      responses:
+        "201":
+          description: Created — the new short link, active (AC-01, AC-08 usable immediately)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShortLink" }
+              example:
+                shortCode: "aB3dEf9"
+                shortUrl: "https://trimly.example.test/aB3dEf9"
+                targetUrl: "https://example.test/articles/1?utm_source=newsletter"
+                state: ACTIVE
+                createdAt: "2026-11-03T10:15:30.123Z"
+        "400":
+          description: |
+            The target URL breaks a rule — nothing is created (sad.md §6 critical flow 2,
+            "target URL breaks a rule"). One `code` per rule:
+            - `link.target_url_unsupported` — not an absolute http/https address with a host, or `targetUrl` missing/empty (AC-03);
+            - `link.target_url_too_long` — more than 2048 characters as submitted (AC-04);
+            - `link.target_url_not_encoded` — spaces, line breaks, control or non-ASCII characters, or an http/https address with other characters that must be percent-encoded (for example `|`, `{`, a bare `%`) (AC-05);
+            - `link.target_url_points_to_trimly` — host is one of trimly's own hosts or a subdomain (AC-06);
+            - `shared.malformed_request` — the body is not a JSON object, the Content-Type is missing or not JSON,
+              the body carries a member other than `targetUrl` (including a misspelt one), or the address is one
+              Spring Security's firewall or the server itself rejects (see `MalformedAddress`).
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+              examples:
+                unsupported:
+                  summary: AC-03 — not an http/https address
+                  value:
+                    type: "about:blank"
+                    title: Bad Request
+                    status: 400
+                    detail: "Only absolute http or https web addresses are accepted."
+                    instance: /api/v1/links
+                    code: link.target_url_unsupported
+                tooLong:
+                  summary: AC-04 — over 2048 characters
+                  value:
+                    type: "about:blank"
+                    title: Bad Request
+                    status: 400
+                    detail: "The target URL must be at most 2048 characters long."
+                    instance: /api/v1/links
+                    code: link.target_url_too_long
+                notEncoded:
+                  summary: AC-05 — must be properly encoded
+                  value:
+                    type: "about:blank"
+                    title: Bad Request
+                    status: 400
+                    detail: "The target URL must be properly encoded: non-Latin hosts in their ASCII xn-- form, other characters percent-encoded."
+                    instance: /api/v1/links
+                    code: link.target_url_not_encoded
+                pointsToTrimly:
+                  summary: AC-06 — no redirect loops
+                  value:
+                    type: "about:blank"
+                    title: Bad Request
+                    status: 400
+                    detail: "A short link cannot point back to trimly."
+                    instance: /api/v1/links
+                    code: link.target_url_points_to_trimly
+        "401": { $ref: "#/components/responses/AuthenticationRequired" }
+        "503": { $ref: "#/components/responses/OwnerTemporarilyUnavailable" }
+
+    get:
+      tags: [owner]
+      summary: List short links, newest first
+      description: |
+        US-03. Newest first; links created in the same instant are ordered later-created first
+        (AC-09). Pages are keyset-paged on an opaque continuation token (ADR-0004), so links
+        created while paging never appear twice or get skipped. No links yet → an empty page, not
+        an error (AC-10). Forward paging only.
+      operationId: listShortLinks
+      parameters:
+        - in: query
+          name: after
+          required: false
+          description: |
+            Opaque continuation token — the `nextCursor` of the previous page. The page starts
+            right after the link it names. Omit for the first page.
+          schema: { type: string, minLength: 1, maxLength: 64 }
+          example: "0193f0c2-7a1e-7c3d-8b4f-2a9e6d1c5b70"
+        - in: query
+          name: limit
+          required: false
+          description: Page size (AC-09 — 20 by default, at most 100).
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: One page of links (possibly empty — AC-10)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShortLinkPage" }
+              examples:
+                page:
+                  summary: AC-09 — a page with more to follow
+                  value:
+                    items:
+                      - shortCode: "aB3dEf9"
+                        shortUrl: "https://trimly.example.test/aB3dEf9"
+                        targetUrl: "https://example.test/articles/2"
+                        state: ACTIVE
+                        createdAt: "2026-11-03T10:15:30.123Z"
+                      - shortCode: "Xy7kPq2"
+                        shortUrl: "https://trimly.example.test/Xy7kPq2"
+                        targetUrl: "https://example.test/articles/1"
+                        state: DISABLED
+                        createdAt: "2026-11-02T08:01:12.004Z"
+                    hasNext: true
+                    nextCursor: "0193eb7e-1d24-7f00-9a51-6c3b2e8d4a11"
+                empty:
+                  summary: AC-10 — no links yet
+                  value:
+                    items: []
+                    hasNext: false
+                    nextCursor: null
+        "400":
+          description: |
+            A paging parameter is invalid (resolves sad.md §6 "flagged for api"):
+            - `link.invalid_page_size` — `limit` is not an integer from 1 to 100;
+            - `link.invalid_cursor` — `after` is not a token this API issued;
+            - `shared.malformed_request` — the server cannot read the request's parameters (a query that is
+              not validly percent-encoded such as `?after=%zz` or a lone `%`, a parameter with an empty name
+              such as `?=x`, or more parameters than the server accepts); or the address is one Spring
+              Security's firewall or the server itself rejects (see `MalformedAddress`).
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+              examples:
+                pageSize:
+                  value:
+                    type: "about:blank"
+                    title: Bad Request
+                    status: 400
+                    detail: "The page size must be a whole number from 1 to 100."
+                    instance: /api/v1/links
+                    code: link.invalid_page_size
+                cursor:
+                  value:
+                    type: "about:blank"
+                    title: Bad Request
+                    status: 400
+                    detail: "The continuation token is not valid. Start again from the first page."
+                    instance: /api/v1/links
+                    code: link.invalid_cursor
+                malformedAddress:
+                  value:
+                    type: "about:blank"
+                    title: Bad Request
+                    status: 400
+                    detail: "The request address is not valid."
+                    code: shared.malformed_request
+        "401": { $ref: "#/components/responses/AuthenticationRequired" }
+        "503": { $ref: "#/components/responses/OwnerTemporarilyUnavailable" }
+
+  /api/v1/links/{shortCode}/disable:
+    post:
+      tags: [owner]
+      summary: Disable a short link
+      description: |
+        US-04. Switches the link off for every visitor from the next visit on (AC-11, AC-12).
+        Repeating it is harmless: an already disabled link is confirmed as disabled, with no error
+        (AC-14). The short code and target URL never change (AC-20). No request body.
+      operationId: disableShortLink
+      parameters:
+        - $ref: "#/components/parameters/ShortCodePath"
+      responses:
+        "200":
+          description: The link's current state — DISABLED (AC-11, AC-14)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShortLinkState" }
+              example:
+                shortCode: "aB3dEf9"
+                state: DISABLED
+        "400": { $ref: "#/components/responses/MalformedAddress" }
+        "401": { $ref: "#/components/responses/AuthenticationRequired" }
+        "404": { $ref: "#/components/responses/OwnerLinkNotFound" }
+        "503": { $ref: "#/components/responses/OwnerTemporarilyUnavailable" }
+
+  /api/v1/links/{shortCode}/enable:
+    post:
+      tags: [owner]
+      summary: Re-enable a disabled short link
+      description: |
+        US-05. Switches the link back on; visitors again reach the same target URL under the same
+        short code (AC-15, AC-20). Repeating it is harmless: an already active link is confirmed as
+        active, with no error (AC-14). No request body.
+      operationId: enableShortLink
+      parameters:
+        - $ref: "#/components/parameters/ShortCodePath"
+      responses:
+        "200":
+          description: The link's current state — ACTIVE (AC-14, AC-15)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShortLinkState" }
+              example:
+                shortCode: "aB3dEf9"
+                state: ACTIVE
+        "400": { $ref: "#/components/responses/MalformedAddress" }
+        "401": { $ref: "#/components/responses/AuthenticationRequired" }
+        "404": { $ref: "#/components/responses/OwnerLinkNotFound" }
+        "503": { $ref: "#/components/responses/OwnerTemporarilyUnavailable" }
+
+  /{shortCode}:
+    get:
+      tags: [visitor]
+      summary: Follow a short link
+      description: |
+        US-02, US-06. Public — no credential (AC-19). The path is exactly one segment, optionally
+        followed by a single trailing slash (`/aB3dEf9/` is the same link); any query string is
+        ignored and never passed on (AC-07). A segment that cannot be a short code — wrong length,
+        characters outside the short-code alphabet, trailing punctuation — and any request with
+        extra path segments is answered "link not found" without a storage lookup (AC-16b).
+        An unknown, disabled or malformed code gets the identical answer (AC-12, AC-16).
+
+        Every answer on this path carries `Cache-Control: no-store`, so no browser or intermediary
+        reuses a redirect without asking trimly again — a disable applies to the very next visit
+        (AC-07, AC-12, spec §6 "Disable propagation"). Bodies of non-redirect answers are a short
+        human-readable sentence in `text/plain`, never Problem Details (ADR-0005).
+      operationId: followShortLink
+      security: []
+      parameters:
+        - in: path
+          name: shortCode
+          required: true
+          description: |
+            The raw path segment. Not validated by the contract — a segment that does not match
+            the short-code pattern simply gets 404 "link not found" (AC-16b).
+          schema: { type: string }
+          example: "aB3dEf9"
+      responses:
+        "302":
+          description: |
+            Temporary redirect to the target URL exactly as stored (AC-07, AC-08, AC-15, AC-19).
+            Never a permanent (cacheable) redirect. Empty body.
+          headers:
+            Location:
+              description: The link's target URL, exactly as stored (data-model `short_link.target_url`).
+              schema: { type: string, format: uri, maxLength: 2048 }
+              example: "https://example.test/articles/1?utm_source=newsletter"
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+        "404":
+          description: |
+            "Link not found" — the code is unknown, disabled or malformed; identical in every case,
+            with no hint whether the code ever existed (AC-12, AC-16, AC-16b). A request Spring
+            Security's firewall or the server itself rejects before trimly runs (a `;`, an encoded
+            `/`, a bad percent-escape such as `%zz` or a lone `%`, a missing or duplicate `Host`, an
+            unreadable `Content-Length`) gets the same answer.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+          content:
+            text/plain:
+              schema: { type: string, const: "Link not found." }
+              example: "Link not found."
+        "503":
+          description: |
+            "Temporarily unavailable" — link storage did not answer within 2 s; sent no later than
+            2 s after the request, never served from a remembered copy (AC-17). Storage waking from
+            idle within the 2 s gets the normal answer.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+          content:
+            text/plain:
+              schema: { type: string, const: "Temporarily unavailable, try again later." }
+              example: "Temporarily unavailable, try again later."
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        The owner credential (≥ 32 printable non-space ASCII characters, ≥ 16 distinct; set by
+        env var, validated at startup — spec §6.1, ADR-0001). Not a JWT; an opaque shared secret
+        compared in constant time.
+
+  parameters:
+    ShortCodePath:
+      in: path
+      name: shortCode
+      required: true
+      description: |
+        The link's short code (AC-01 alphabet: A–Z, a–z, 2–9 without 0 O o 1 l I; case matters).
+        A value that cannot be a short code is answered 404 `link.not_found` without a storage
+        lookup — same as an unknown code (resolves sad.md §6 "flagged for api", mirrors AC-16b).
+      schema: { $ref: "#/components/schemas/ShortCode" }
+      example: "aB3dEf9"
+
+  headers:
+    NoStore:
+      description: Forbids reuse of the answer without asking trimly again (AC-07, sad.md §8 "Redirect reuse").
+      schema: { type: string, const: no-store }
+
+  responses:
+    AuthenticationRequired:
+      description: |
+        The owner credential is missing or wrong — the two cases get a byte-identical answer, no
+        link data, nothing created or changed (AC-18; sad.md §6 auth-denied branch in critical
+        flow 2, List, Disable or re-enable). Produced by `access`'s authentication entry point in
+        the same Problem Details shape (ADR-0001, sad.md §8).
+      headers:
+        WWW-Authenticate:
+          description: Always exactly `Bearer` — never an `error=` attribute that would tell a wrong credential from a missing one.
+          schema: { type: string, const: Bearer }
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+          example:
+            type: "about:blank"
+            title: Unauthorized
+            status: 401
+            detail: "Authentication is required."
+            instance: /api/v1/links
+            code: access.authentication_required
+
+    OwnerLinkNotFound:
+      description: |
+        No link has this short code (or the value cannot be a short code); nothing changed
+        (AC-13; sad.md §6 Disable or re-enable, "no link has this short code").
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+          example:
+            type: "about:blank"
+            title: Not Found
+            status: 404
+            detail: "The link was not found."
+            instance: /api/v1/links/aB3dEf9/disable
+            code: link.not_found
+
+    MalformedAddress:
+      description: |
+        The request can never name an operation, and nothing is read or changed. Either Spring
+        Security's firewall rejects the address (a `;`, an encoded `/` or `%`, an empty segment, for
+        example `/api/v1/links/ab%2Fcdef/disable`), or the server itself rejects the request before
+        trimly runs: a bad address (a bad percent-escape such as `%zz` or a lone `%`, an encoded NUL
+        or backslash, a path above the root) or another request flaw (a missing or duplicate `Host`,
+        an unreadable `Content-Length`). Answered before the credential is checked, with the
+        owner-API no-cache and nosniff headers (review 2026-11-08 R2, R3; 2026-11-08-r2 S2).
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+          example:
+            type: "about:blank"
+            title: Bad Request
+            status: 400
+            detail: "The request address is not valid."
+            code: shared.malformed_request
+
+    OwnerTemporarilyUnavailable:
+      description: |
+        Link storage did not answer within 2 s, or (create only) 5 freshly generated short codes
+        were all taken; nothing is confirmed (AC-17b, AC-20b; sad.md §6 "storage does not answer
+        within 2 s" in every owner flow, "5 codes taken" in critical flow 2).
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+          example:
+            type: "about:blank"
+            title: Service Unavailable
+            status: 503
+            detail: "Temporarily unavailable, try again later."
+            instance: /api/v1/links
+            code: link.temporarily_unavailable
+
+  schemas:
+    # RFC 9457 Problem Details (Spring `ProblemDetail`) + one extension member, `code`, in the
+    # neutral `module.error_name` convention. Never carries a stack trace or exception message.
+    Problem:
+      type: object
+      required: [type, title, status, code]
+      properties:
+        type: { type: string, format: uri-reference, default: "about:blank" }
+        title: { type: string }
+        status: { type: integer, minimum: 400, maximum: 599 }
+        detail: { type: string, description: A fixed human-readable sentence for this code. }
+        instance: { type: string, format: uri-reference }
+        code:
+          type: string
+          pattern: "^[a-z_]+\\.[a-z_]+$"
+          enum:
+            - access.authentication_required
+            - link.target_url_unsupported
+            - link.target_url_too_long
+            - link.target_url_not_encoded
+            - link.target_url_points_to_trimly
+            - link.invalid_page_size
+            - link.invalid_cursor
+            - link.not_found
+            - link.temporarily_unavailable
+            - shared.malformed_request
+            # Fallbacks the shared advice sets on framework-level answers that carry no module code
+            # (review 2026-11-07, R5): unknown owner-API address, unsupported method, unacceptable
+            # Accept header, unexpected failure.
+            - shared.not_found
+            - shared.method_not_allowed
+            - shared.not_acceptable
+            - shared.internal_error
+          example: link.not_found
+
+    ShortCode:
+      description: |
+        Public short code — data-model `short_link.short_code` (7 chars, COLLATE "C", unique).
+        Alphabet per AC-01: A–Z, a–z, 2–9 minus 0 O o 1 l I (56 characters); case-sensitive.
+      type: string
+      minLength: 7
+      maxLength: 7
+      pattern: "^[A-HJ-NP-Za-km-np-z2-9]{7}$"
+
+    TargetUrl:
+      description: |
+        Data-model `short_link.target_url` (1..2048 chars, stored exactly as submitted). The
+        domain rules (AC-03…AC-06) are enforced by `link.domain`; the pattern here mirrors only
+        the printable-ASCII, no-space part of AC-05.
+      type: string
+      format: uri
+      minLength: 1
+      maxLength: 2048
+      pattern: "^[\\x21-\\x7E]+$"
+
+    LinkState:
+      description: Data-model `short_link.state` (CHECK in ACTIVE, DISABLED).
+      type: string
+      enum: [ACTIVE, DISABLED]
+
+    ShortLinkCreate:
+      type: object
+      required: [targetUrl]
+      additionalProperties: false
+      properties:
+        targetUrl: { $ref: "#/components/schemas/TargetUrl" }
+
+    ShortLink:
+      type: object
+      required: [shortCode, shortUrl, targetUrl, state, createdAt]
+      additionalProperties: false
+      properties:
+        shortCode: { $ref: "#/components/schemas/ShortCode" }
+        shortUrl:
+          description: The full short link — `trimly.public-base-url` + "/" + shortCode (AC-01). Response-only.
+          type: string
+          format: uri
+        targetUrl: { $ref: "#/components/schemas/TargetUrl" }
+        state: { $ref: "#/components/schemas/LinkState" }
+        createdAt:
+          description: Data-model `short_link.created_at` (from the injected Clock).
+          type: string
+          format: date-time
+
+    ShortLinkState:
+      description: Result of disable / re-enable — the row the state UPDATE returns (data-model "RETURNING short_code, state").
+      type: object
+      required: [shortCode, state]
+      additionalProperties: false
+      properties:
+        shortCode: { $ref: "#/components/schemas/ShortCode" }
+        state: { $ref: "#/components/schemas/LinkState" }
+
+    # Cursor page wrapper — forward-only keyset paging (ADR-0004); never offset.
+    ShortLinkPage:
+      type: object
+      required: [items, hasNext, nextCursor]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/ShortLink" }
+        hasNext: { type: boolean }
+        nextCursor:
+          description: Opaque token for the next page's `after`; null when `hasNext` is false.
+          type: [string, "null"]
